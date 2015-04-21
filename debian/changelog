@@ -1,0 +1,5 @@
+zaqar (2015.1~rc1-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #XXXXXX)
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 21 Apr 2015 10:23:04 +0200
