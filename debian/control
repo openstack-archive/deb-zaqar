@@ -6,9 +6,9 @@ Uploaders: Thomas Goirand <zigo@debian.org>
 Build-Depends: debhelper (>= 9),
                dh-python,
                dh-systemd,
-               openstack-pkg-tools (>= 20~),
+               openstack-pkg-tools (>= 23~),
                po-debconf,
-               python-all (>= 2.6.6-3~),
+               python-all,
                python-pbr,
                python-setuptools,
                python-sphinx,
@@ -55,7 +55,6 @@ Homepage: https://github.com/openstack/zaqar/
 Package: python-zaqar
 Section: python
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
 Depends: python-autobahn (>= 0.10.1),
          python-babel,
          python-enum34,
@@ -102,7 +101,6 @@ Description: OpenStack Queueing as a Service - Python libraries
 
 Package: zaqar-common
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
 Depends: adduser,
          dbconfig-common,
          debconf,
@@ -134,7 +132,6 @@ Description: OpenStack Queueing as a Service - common files
 
 Package: zaqar-server
 Architecture: all
-Pre-Depends: dpkg (>= 1.15.6~)
 Depends: adduser,
          zaqar-common (= ${binary:Version}),
          debconf,
