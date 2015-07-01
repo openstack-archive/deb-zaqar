@@ -35,7 +35,7 @@ check_for_cmd mongod
 
 # Start MongoDB process for tests
 MONGO_DATA=`mktemp -d /tmp/CEILO-MONGODB-XXXXX`
-MONGO_PORT=27017
+MONGO_PORT=27011
 trap "clean_exit ${MONGO_DATA}" EXIT
 mkfifo ${MONGO_DATA}/out
 mongod --maxConns 32 --nojournal --noprealloc --smallfiles --quiet --noauth --port ${MONGO_PORT} --dbpath "${MONGO_DATA}" --bind_ip localhost --config /dev/null &>${MONGO_DATA}/out &
@@ -45,14 +45,5 @@ wait_for_line "waiting for connections on port ${MONGO_PORT}" ${MONGO_DATA}/out
 cat ${MONGO_DATA}/out > /dev/null &
 # It'd be nice if Zaqar understood something like this:
 #export CEILOMETER_TEST_MONGODB_URL="mongodb://localhost:${MONGO_PORT}/ceilometer"
-if test -n "$CEILOMETER_TEST_HBASE_URL"
-then
-    export CEILOMETER_TEST_HBASE_TABLE_PREFIX=$(hexdump -n 16 -v -e '/1 "%02X"' /dev/urandom)
-    python tools/test_hbase_table_utils.py --upgrade
-fi
-
-export ZAQAR_TEST_MONGODB=1
-export ZAQAR_TEST_SLOW=1
-
-# Yield execution to venv command
+export ZAQAR_TEST_MONGODB_URL=mongodb://localhost:${MONGO_PORT}
 $*

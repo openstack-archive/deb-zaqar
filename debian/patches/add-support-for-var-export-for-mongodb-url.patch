@@ -1,0 +1,89 @@
+Description: Allow configuration of test url using env variable
+ This adds a new ZAQAR_TEST_MONGODB_URL environement variable that you
+ can set before running tests, to not run them against the default
+ localhost:27017 instance.
+Author: Thomas Herve <therve@redhat.com>
+Date: Wed, 1 Jul 2015 13:31:37 +0000 (+0200)
+X-Git-Url: https://review.openstack.org/gitweb?p=openstack%2Fzaqar.git;a=commitdiff_plain;h=8c9f827a246b96dcbe8c4f395d02c85e792d16bf
+Change-Id: Ic3dae5e92fbe87155ac95cc597535af2f5f94e3c
+Origin: upstream, https://review.openstack.org/#/c/197590/
+Last-Update: 2015-07-01
+
+--- zaqar-2015.1.0.orig/tests/unit/test_bootstrap.py
++++ zaqar-2015.1.0/tests/unit/test_bootstrap.py
+@@ -17,6 +17,7 @@ from zaqar import bootstrap
+ from zaqar.common import errors
+ from zaqar.storage import pooling
+ from zaqar.tests import base
++from zaqar.tests import helpers
+ from zaqar.transport import websocket
+ from zaqar.transport import wsgi
+ 
+@@ -24,6 +25,7 @@ from zaqar.transport import wsgi
+ class TestBootstrap(base.TestBase):
+ 
+     def _bootstrap(self, conf_file):
++        conf_file = helpers.override_mongo_conf(conf_file, self)
+         self.conf = self.load_conf(conf_file)
+         return bootstrap.Bootstrap(self.conf)
+ 
+--- zaqar-2015.1.0.orig/zaqar/tests/base.py
++++ zaqar-2015.1.0/zaqar/tests/base.py
+@@ -21,6 +21,7 @@ import six
+ import testtools
+ 
+ from zaqar import bootstrap
++from zaqar.tests import helpers
+ 
+ 
+ class TestBase(testtools.TestCase):
+@@ -46,6 +47,8 @@ class TestBase(testtools.TestCase):
+             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
+ 
+         if self.config_file:
++            self.config_file = helpers.override_mongo_conf(
++                self.config_file, self)
+             self.conf = self.load_conf(self.config_file)
+         else:
+             self.conf = cfg.ConfigOpts()
+--- zaqar-2015.1.0.orig/zaqar/tests/helpers.py
++++ zaqar-2015.1.0/zaqar/tests/helpers.py
+@@ -13,9 +13,11 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++import ConfigParser
+ import contextlib
+ import functools
+ import os
++import tempfile
+ import uuid
+ 
+ import six
+@@ -254,3 +256,26 @@ def is_slow(condition=lambda self: True)
+         return wrapper
+ 
+     return decorator
++
++
++def override_mongo_conf(conf_file, test):
++    test_mongo_url = os.environ.get('ZAQAR_TEST_MONGODB_URL')
++    if test_mongo_url:
++        parser = ConfigParser.ConfigParser()
++        parser.read(test.conf_path(conf_file))
++        sections = ['drivers:management_store:mongodb',
++                    'drivers:message_store:mongodb']   
++        for section in sections:
++            if not parser.has_section(section):
++                parser.add_section(section)
++            parser.set(section, 'uri', test_mongo_url)
++        fd, path = tempfile.mkstemp()
++        conf_fd = os.fdopen(fd, 'w') 
++        try:
++            parser.write(conf_fd)
++        finally:
++            conf_fd.close()
++        test.addCleanup(os.remove, path)
++        return path
++    else:
++        return conf_file
