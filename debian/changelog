@@ -1,4 +1,4 @@
-zaqar (2015.1.0-1) unstable; urgency=medium
+zaqar (1.0.0~b3-1) unstable; urgency=medium
 
   * Initial release. (Closes: #787182)
 
