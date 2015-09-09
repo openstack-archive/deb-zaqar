@@ -45,5 +45,6 @@ wait_for_line "waiting for connections on port ${MONGO_PORT}" ${MONGO_DATA}/out
 cat ${MONGO_DATA}/out > /dev/null &
 # It'd be nice if Zaqar understood something like this:
 #export CEILOMETER_TEST_MONGODB_URL="mongodb://localhost:${MONGO_PORT}/ceilometer"
+export ZAQAR_TESTS_CONFIGS_DIR=`pwd`/zaqar/tests/etc
 export ZAQAR_TEST_MONGODB_URL=mongodb://localhost:${MONGO_PORT}
 $*
