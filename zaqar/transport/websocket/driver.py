@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo.config import cfg
+from oslo_config import cfg
+from oslo_log import log as logging
 
 try:
     import asyncio
@@ -22,7 +23,8 @@ except ImportError:
 
 from zaqar.common import decorators
 from zaqar.i18n import _
-import zaqar.openstack.common.log as logging
+from zaqar.transport import auth
+from zaqar.transport import base
 from zaqar.transport.websocket import factory
 
 
@@ -32,6 +34,9 @@ _WS_OPTIONS = (
 
     cfg.IntOpt('port', default=9000,
                help='Port on which the self-hosting server will listen.'),
+
+    cfg.IntOpt('external-port', default=None,
+               help='Port on which the service is provided to the user.'),
 
     cfg.BoolOpt('debug', default=False, help='Print debugging output')
 )
@@ -45,21 +50,34 @@ def _config_options():
     return [(_WS_GROUP, _WS_OPTIONS)]
 
 
-class Driver(object):
+class Driver(base.DriverBase):
 
     def __init__(self, conf, api, cache):
-        self._conf = conf
+        super(Driver, self).__init__(conf, None, None, None)
         self._api = api
         self._cache = cache
 
         self._conf.register_opts(_WS_OPTIONS, group=_WS_GROUP)
         self._ws_conf = self._conf[_WS_GROUP]
 
+        if self._conf.auth_strategy:
+            auth_strategy = auth.strategy(self._conf.auth_strategy)
+            self._auth_strategy = lambda app: auth_strategy.install(
+                app, self._conf)
+        else:
+            self._auth_strategy = None
+
     @decorators.lazy_property(write=False)
     def factory(self):
         uri = 'ws://' + self._ws_conf.bind + ':' + str(self._ws_conf.port)
-        return factory.ProtocolFactory(uri, debug=self._ws_conf.debug,
-                                       handler=self._api)
+        return factory.ProtocolFactory(
+            uri,
+            debug=self._ws_conf.debug,
+            handler=self._api,
+            external_port=self._ws_conf.external_port,
+            auth_strategy=self._auth_strategy,
+            loop=asyncio.get_event_loop(),
+            secret_key=self._conf.signed_url.secret_key)
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WS config group."""

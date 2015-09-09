@@ -14,14 +14,12 @@
 # the License.
 
 from zaqar.storage.sqlalchemy import catalogue
-from zaqar.storage.sqlalchemy import claims
-from zaqar.storage.sqlalchemy import messages
+from zaqar.storage.sqlalchemy import flavors
 from zaqar.storage.sqlalchemy import pools
 from zaqar.storage.sqlalchemy import queues
 
 
 QueueController = queues.QueueController
-ClaimController = claims.ClaimController
-MessageController = messages.MessageController
 CatalogueController = catalogue.CatalogueController
 PoolsController = pools.PoolsController
+FlavorsController = flavors.FlavorsController

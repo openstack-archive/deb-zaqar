@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import uuid
 
 import mock
 
 from zaqar.notification import notifier
-from zaqar.notification import task
 from zaqar import tests as testing
 
 
@@ -30,7 +30,7 @@ class NotifierTest(testing.TestBase):
                              {'subscriber': 'http://call.me'},
                              {'subscriber': 'http://ping.me'}
                              ]
-        self.cliend_id = uuid.uuid4()
+        self.client_id = uuid.uuid4()
         self.project = uuid.uuid4()
         self.messages = [{"ttl": 300,
                           "body": {"event": "BackupStarted",
@@ -43,27 +43,41 @@ class NotifierTest(testing.TestBase):
                          ]
 
         ctlr = mock.MagicMock()
-        ctlr.list = mock.Mock(return_value=iter(self.subscription))
+        ctlr.list = mock.Mock(return_value=iter([self.subscription]))
         self.driver = notifier.NotifierDriver(subscription_controller=ctlr)
 
     def test_post(self):
+        headers = {'Content-Type': 'application/json'}
         with mock.patch('requests.post') as mock_post:
             self.driver.post('fake_queue', self.messages,
-                             self.client_uuid, self.project)
-            mock_post.assert_called_with(self.subscription[0]['subscriber'],
-                                         self.messages[0])
-            mock_post.assert_called_with(self.subscription[0]['subscriber'],
-                                         self.messages[0])
-            mock_post.assert_called_with(self.subscription[1]['subscriber'],
-                                         self.messages[0])
-            mock_post.assert_called_with(self.subscription[1]['subscriber'],
-                                         self.messages[1])
-            mock_post.assert_called_with(self.subscription[2]['subscriber'],
-                                         self.messages[1])
-            mock_post.assert_called_with(self.subscription[2]['subscriber'],
-                                         self.messages[1])
+                             self.client_id, self.project)
+            mock_post.assert_has_calls([
+                mock.call(self.subscription[0]['subscriber'],
+                          data=json.dumps(self.messages[0]),
+                          headers=headers),
+                mock.call(self.subscription[1]['subscriber'],
+                          data=json.dumps(self.messages[0]),
+                          headers=headers),
+                mock.call(self.subscription[2]['subscriber'],
+                          data=json.dumps(self.messages[0]),
+                          headers=headers),
+                mock.call(self.subscription[0]['subscriber'],
+                          data=json.dumps(self.messages[1]),
+                          headers=headers),
+                mock.call(self.subscription[1]['subscriber'],
+                          data=json.dumps(self.messages[1]),
+                          headers=headers),
+                mock.call(self.subscription[2]['subscriber'],
+                          data=json.dumps(self.messages[1]),
+                          headers=headers),
+                ], any_order=True)
+            self.assertEqual(6, len(mock_post.mock_calls))
 
-    def test_genrate_task(self):
-        subscriber = self.subscription_list[0]['subscriber']
-        new_task = self.driver._generate_task(subscriber, self.messages)
-        self.assertIsInstance(new_task, task.webhook.WebhookTask)
+    def test_post_no_subscriber(self):
+        ctlr = mock.MagicMock()
+        ctlr.list = mock.Mock(return_value=iter([[]]))
+        driver = notifier.NotifierDriver(subscription_controller=ctlr)
+        with mock.patch('requests.post') as mock_post:
+            driver.post('fake_queue', self.messages, self.client_id,
+                        self.project)
+            self.assertEqual(0, mock_post.call_count)

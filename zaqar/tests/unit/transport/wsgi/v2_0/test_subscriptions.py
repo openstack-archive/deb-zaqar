@@ -16,17 +16,20 @@ import uuid
 
 import ddt
 import falcon
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 
 from zaqar import tests as testing
 from zaqar.tests.unit.transport.wsgi import base
 
 
 @ddt.ddt
-class SubscriptionsBaseTest(base.V2Base):
+class TestSubscriptionsMongoDB(base.V2Base):
 
+    config_file = 'wsgi_mongodb_pooled.conf'
+
+    @testing.requires_mongodb
     def setUp(self):
-        super(SubscriptionsBaseTest, self).setUp()
+        super(TestSubscriptionsMongoDB, self).setUp()
 
         if self.conf.pooling:
             for i in range(1):
@@ -54,9 +57,6 @@ class SubscriptionsBaseTest(base.V2Base):
 
         self.addCleanup(self._delete_subscription)
 
-    def tearDown(self):
-        super(SubscriptionsBaseTest, self).tearDown()
-
     def _delete_subscription(self, sid=None):
         if sid:
             self.simulate_delete(self.subscription_path + '/' + sid,
@@ -82,8 +82,16 @@ class SubscriptionsBaseTest(base.V2Base):
                                   headers=self.headers)
 
     def test_create_works(self):
-        self._create_subscription()
+        resp = self._create_subscription()
         self.assertEqual(self.srmock.status, falcon.HTTP_201)
+        resp_doc = jsonutils.loads(resp[0])
+
+        resp_list = self.simulate_get(self.subscription_path,
+                                      headers=self.headers)
+        resp_list_doc = jsonutils.loads(resp_list[0])
+        sid = resp_list_doc['subscriptions'][0]['id']
+
+        self.assertEqual(sid, resp_doc['subscription_id'])
 
     def test_create_duplicate_409(self):
         self._create_subscription(subscriber='http://CCC.com')
@@ -97,6 +105,12 @@ class SubscriptionsBaseTest(base.V2Base):
         self.assertEqual(self.srmock.status, falcon.HTTP_400)
         resp_doc = jsonutils.loads(resp[0])
         self.assertIn('body could not be parsed', resp_doc['description'])
+
+    def test_create_no_body(self):
+        resp = self.simulate_post(self.subscription_path, headers=self.headers)
+        self.assertEqual(self.srmock.status, falcon.HTTP_400)
+        self.assertIn('Missing parameter',
+                      jsonutils.loads(resp[0])['description'])
 
     def test_create_invalid_subscriber_400(self):
         resp = self._create_subscription(subscriber='fake')
@@ -233,6 +247,20 @@ class SubscriptionsBaseTest(base.V2Base):
                             headers=self.headers)
         self.assertEqual(self.srmock.status, falcon.HTTP_404)
 
+    def test_patch_no_body(self):
+        self._create_subscription()
+        resp = self.simulate_get(self.subscription_path,
+                                 headers=self.headers)
+        resp_doc = jsonutils.loads(resp[0])
+        sid = resp_doc['subscriptions'][0]['id']
+
+        resp = self.simulate_patch(self.subscription_path + '/' + sid,
+                                   headers=self.headers)
+        self.assertEqual(self.srmock.status, falcon.HTTP_400)
+
+        resp_doc = jsonutils.loads(resp[0])
+        self.assertNotIn('{subscription_id}', resp_doc['description'])
+
     def test_patch_invalid_ttl(self):
         self.simulate_patch(self.subscription_path + '/x',
                             body='{"ttl": "invalid"}',
@@ -257,12 +285,3 @@ class SubscriptionsBaseTest(base.V2Base):
         resp = self.simulate_get(self.subscription_path + '/' + sid,
                                  headers=self.headers)
         self.assertEqual(self.srmock.status, falcon.HTTP_404)
-
-
-class TestSubscriptionsMongoDB(SubscriptionsBaseTest):
-
-    config_file = 'wsgi_mongodb_pooled.conf'
-
-    @testing.requires_mongodb
-    def setUp(self):
-        super(TestSubscriptionsMongoDB, self).setUp()

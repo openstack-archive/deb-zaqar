@@ -14,16 +14,16 @@ all of these steps are required. It is assumed you have `MongoDB`_ and `tox`
 1. Install prerequisites:
 
 # Ubuntu/Debian:
-sudo apt-get install gcc python-pip libxml2 libxml2-dev libxslt libxslt-dev
+sudo apt-get install gcc python-pip libxml2-dev libxslt1-dev
 
 # Fedora/RHEL:
-sudo yum install gcc python-pip libxml2 libxml2-devel libxslt libxslt-devel
+sudo yum install gcc python-pip libxml2-devel libxslt-devel
 
 2. From your home folder create the ``~/.zaqar`` folder and clone the repo::
 
     $ cd
-    $ mkdir .zaqar
-    $ git clone https://github.com/openstack/zaqar.git
+    $ mkdir ~/.zaqar
+    $ git clone https://git.openstack.org/openstack/zaqar.git
 
 3. Generate and copy the Zaqar config files to the directory ``~/.zaqar``::
 
@@ -36,7 +36,8 @@ sudo yum install gcc python-pip libxml2 libxml2-devel libxslt libxslt-devel
 4. Find ``[drivers]`` section in ``~/.zaqar/zaqar.conf``
    and specify to use mongodb storage::
 
-    storage = mongodb
+    message_storage = mongodb
+    management_store = mongodb
 
    Then find the ``[drivers:message_store:mongodb]`` and
    ``[drivers:management_store:mongodb]`` sections and
@@ -168,8 +169,6 @@ the ``--verbose`` flag. Verbose output looks similar to the following::
 
 .. _`OpenStack` : http://openstack.org/
 .. _`MongoDB` : http://docs.mongodb.org/manual/installation/
-.. _`pyenv` : https://github.com/yyuu/pyenv/
-.. _`virtualenv` : https://pypi.python.org/pypi/virtualenv/
 .. _`wiki` : https://wiki.openstack.org/wiki/Zaqar
-.. _`TESTS_README` : https://github.com/openstack/zaqar/blob/master/tests/functional/README.rst
+.. _`TESTS_README` : https://github.com/openstack/zaqar/blob/master/zaqar/tests/functional/README.rst
 

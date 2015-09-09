@@ -18,6 +18,7 @@ from falcon import testing as ftest
 from oslo_serialization import jsonutils
 
 from zaqar import bootstrap
+from zaqar.common import configs
 from zaqar import tests as testing
 from zaqar.transport import validation
 from zaqar.transport.wsgi import driver
@@ -33,7 +34,7 @@ class TestBase(testing.TestBase):
         if not self.config_file:
             self.skipTest("No config specified")
 
-        self.conf.register_opts(bootstrap._GENERAL_OPTIONS)
+        self.conf.register_opts(configs._GENERAL_OPTIONS)
         self.conf.register_opts(validation._TRANSPORT_LIMITS_OPTIONS,
                                 group=validation._TRANSPORT_LIMITS_GROUP)
         self.transport_cfg = self.conf[validation._TRANSPORT_LIMITS_GROUP]
@@ -126,7 +127,7 @@ class V1Base(TestBase):
 
     Should contain methods specific to V1 of the API
     """
-    pass
+    url_prefix = '/v1'
 
 
 class V1BaseFaulty(TestBaseFaulty):
@@ -134,7 +135,7 @@ class V1BaseFaulty(TestBaseFaulty):
 
     Should contain methods specific to V1 exception testing
     """
-    pass
+    url_prefix = '/v1'
 
 
 class V1_1Base(TestBase):
@@ -142,6 +143,7 @@ class V1_1Base(TestBase):
 
     Should contain methods specific to V1.1 of the API
     """
+    url_prefix = '/v1.1'
 
     def _empty_message_list(self, body):
         self.assertEqual(jsonutils.loads(body[0])['messages'], [])
@@ -152,7 +154,7 @@ class V1_1BaseFaulty(TestBaseFaulty):
 
     Should contain methods specific to V1.1 exception testing
     """
-    pass
+    url_prefix = '/v1.1'
 
 
 class V2Base(V1_1Base):
@@ -160,6 +162,7 @@ class V2Base(V1_1Base):
 
     Should contain methods specific to V2 of the API
     """
+    url_prefix = '/v2'
 
 
 class V2BaseFaulty(V1_1BaseFaulty):
@@ -167,3 +170,4 @@ class V2BaseFaulty(V1_1BaseFaulty):
 
     Should contain methods specific to V2 exception testing
     """
+    url_prefix = '/v2'

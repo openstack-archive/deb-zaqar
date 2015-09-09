@@ -15,11 +15,11 @@
 
 import falcon
 import jsonschema
+from oslo_log import log
 
 from zaqar.common.api.schemas import flavors as schema
 from zaqar.common import utils as common_utils
 from zaqar.i18n import _
-from zaqar.openstack.common import log
 from zaqar.storage import errors
 from zaqar.transport import utils as transport_utils
 from zaqar.transport.wsgi import errors as wsgi_errors
@@ -66,20 +66,21 @@ class Listing(object):
         cursor = self._ctrl.list(project=project_id, **store)
         flavors = list(next(cursor))
 
-        results = {}
+        results = {'links': []}
 
         if flavors:
             store['marker'] = next(cursor)
 
             for entry in flavors:
-                entry['href'] = request.path + '/' + entry.pop('name')
+                entry['href'] = request.path + '/' + entry['name']
 
-        results['links'] = [
-            {
-                'rel': 'next',
-                'href': request.path + falcon.to_query_str(store)
-            }
-        ]
+            results['links'] = [
+                {
+                    'rel': 'next',
+                    'href': request.path + falcon.to_query_str(store)
+                }
+            ]
+
         results['flavors'] = flavors
 
         response.body = transport_utils.to_json(results)
@@ -126,8 +127,6 @@ class Resource(object):
 
         data['href'] = request.path
 
-        # remove the name entry - it isn't needed on GET
-        del data['name']
         response.body = transport_utils.to_json(data)
 
     def on_put(self, request, response, project_id, flavor):

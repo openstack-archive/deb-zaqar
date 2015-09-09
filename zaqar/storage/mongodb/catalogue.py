@@ -25,7 +25,8 @@ Serves to construct an association between a project + queue -> pool.
     }
 """
 
-import zaqar.openstack.common.log as logging
+from oslo_log import log as logging
+
 from zaqar.storage import base
 from zaqar.storage import errors
 from zaqar.storage.mongodb import utils
@@ -67,7 +68,7 @@ class CatalogueController(base.CatalogueBase):
         fields = {'_id': 0}
         key = utils.scope_queue_name(queue, project)
         entry = self._col.find_one({PRIMARY_KEY: key},
-                                   fields=fields)
+                                   projection=fields)
 
         if entry is None:
             raise errors.QueueNotMapped(queue, project)

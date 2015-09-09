@@ -23,10 +23,10 @@ import uuid
 
 import enum
 from oslo_config import cfg
+from oslo_log import log as logging
 import six
 
 from zaqar.common import decorators
-import zaqar.openstack.common.log as logging
 from zaqar.storage import errors
 from zaqar.storage import utils
 
@@ -693,7 +693,7 @@ class PoolsBase(ControllerBase):
     """A controller for managing pools."""
 
     def _check_capabilities(self, uri, group=None, name=None):
-        default_store = self.driver.conf.drivers.storage
+        default_store = self.driver.conf.drivers.message_store
         pool_caps = self.capabilities(group=group, name=name)
 
         if not pool_caps:
@@ -723,7 +723,7 @@ class PoolsBase(ControllerBase):
         if not len(group) > 0:
             return ()
 
-        default_store = self.driver.conf.drivers.storage
+        default_store = self.driver.conf.drivers.message_store
 
         pool_store = utils.load_storage_impl(group[0]['uri'],
                                              default_store=default_store)

@@ -18,13 +18,28 @@
 from keystoneclient import auth
 from keystonemiddleware import auth_token
 from keystonemiddleware import opts
-
-from zaqar.openstack.common import log
+from oslo_log import log
 
 
 STRATEGIES = {}
 
 LOG = log.getLogger(__name__)
+
+
+class SignedHeadersAuth(object):
+
+    def __init__(self, app, auth_app):
+        self._app = app
+        self._auth_app = auth_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO')
+        signature = environ.get('HTTP_URL_SIGNATURE')
+
+        if signature is None or path.startswith('/v1'):
+            return self._auth_app(environ, start_response)
+
+        return self._app(environ, start_response)
 
 
 class KeystoneAuth(object):

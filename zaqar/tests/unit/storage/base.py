@@ -68,7 +68,11 @@ class ControllerBaseTest(testing.TestBase):
         else:
             uri = "mongodb://localhost:27017"
             for i in range(4):
-                options = {'database': "zaqar_test_pools_" + str(i)}
+                db_name = "zaqar_test_pools_" + str(i)
+
+                # NOTE(dynarro): we need to create a unique uri.
+                uri = "%s/%s" % (uri, db_name)
+                options = {'database': db_name}
                 self.control.pools_controller.create(six.text_type(i),
                                                      100, uri, options=options)
             self.driver = self.driver_class(self.conf, cache, self.control)
@@ -579,15 +583,20 @@ class MessageControllerTest(ControllerBaseTest):
                                                       client_uuid=client_uuid)
 
         # NOTE(kgriffs): Allow for automatic GC of claims, messages
-        time.sleep(self.gc_interval)
+        for i in range(self.gc_interval):
+            time.sleep(1)
 
-        # NOTE(kgriffs): Some drivers require a manual GC to be
-        # triggered to clean up claims and messages.
-        self.driver.gc()
+            # NOTE(kgriffs): Some drivers require a manual GC to be
+            # triggered to clean up claims and messages.
+            self.driver.gc()
 
-        with testing.expect(errors.DoesNotExist):
-            self.controller.get(self.queue_name, msgid_expired,
-                                project=self.project)
+            try:
+                self.controller.get(self.queue_name, msgid_expired,
+                                    project=self.project)
+            except errors.DoesNotExist:
+                break
+        else:
+            self.fail("Didn't remove the queue")
 
         stats = self.queue_controller.stats(self.queue_name,
                                             project=self.project)
@@ -1099,20 +1108,20 @@ class PoolsControllerTest(ControllerBaseTest):
 
     def test_create_succeeds(self):
         self.pools_controller.create(str(uuid.uuid1()),
-                                     100, 'localhost',
+                                     100, 'localhost:13124',
                                      options={})
 
     def test_create_replaces_on_duplicate_insert(self):
         name = str(uuid.uuid1())
         self.pools_controller.create(name,
-                                     100, 'localhost',
+                                     100, 'localhost:76553',
                                      options={})
         self.pools_controller.create(name,
-                                     111, 'localhost2',
+                                     111, 'localhost:758353',
                                      options={})
         entry = self.pools_controller.get(name)
         self._pool_expects(entry, xname=name, xweight=111,
-                           xlocation='localhost2')
+                           xlocation='localhost:758353')
 
     def _pool_expects(self, pool, xname, xweight, xlocation):
         self.assertIn('name', pool)
@@ -1398,7 +1407,7 @@ class FlavorsControllerTest(ControllerBaseTest):
                                        capabilities={})
 
         pool2 = 'another_pool'
-        self.pools_controller.create(pool2, 100, 'localhost',
+        self.pools_controller.create(pool2, 100, 'localhost:27017',
                                      group=pool2, options={})
         self.addCleanup(self.pools_controller.delete, pool2)
 
@@ -1487,7 +1496,8 @@ class FlavorsControllerTest(ControllerBaseTest):
         name_gen = lambda i: chr(ord('A') + i)
         for i in range(15):
             pool = str(i)
-            self.pools_controller.create(pool, 100, 'localhost',
+            uri = 'localhost:2701' + pool
+            self.pools_controller.create(pool, 100, uri,
                                          group=pool, options={})
             self.addCleanup(self.pools_controller.delete, pool)
 

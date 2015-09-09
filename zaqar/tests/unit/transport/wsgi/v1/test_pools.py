@@ -38,6 +38,7 @@ def pool(test, name, weight, uri, options={}):
     :returns: (name, weight, uri, options)
     :rtype: see above
     """
+    uri = "%s/%s" % (uri, str(uuid.uuid4()))
     doc = {'weight': weight, 'uri': uri, 'options': options}
     path = test.url_prefix + '/pools/' + name
 
@@ -67,6 +68,7 @@ def pools(test, count, uri):
              {str(i): i})
             for i in range(count)]
     for path, weight, option in args:
+        uri = "%s/%s" % (uri, str(uuid.uuid4()))
         doc = {'weight': weight, 'uri': uri, 'options': option}
         test.simulate_put(path, body=jsonutils.dumps(doc))
 
@@ -78,17 +80,20 @@ def pools(test, count, uri):
 
 
 @ddt.ddt
-class PoolsBaseTest(base.V1Base):
+class TestPoolsMongoDB(base.V1Base):
 
+    config_file = 'wsgi_mongodb_pooled.conf'
+
+    @testing.requires_mongodb
     def setUp(self):
-        super(PoolsBaseTest, self).setUp()
+        super(TestPoolsMongoDB, self).setUp()
         self.doc = {'weight': 100, 'uri': 'mongodb://localhost:27017'}
         self.pool = self.url_prefix + '/pools/' + str(uuid.uuid1())
         self.simulate_put(self.pool, body=jsonutils.dumps(self.doc))
         self.assertEqual(self.srmock.status, falcon.HTTP_201)
 
     def tearDown(self):
-        super(PoolsBaseTest, self).tearDown()
+        super(TestPoolsMongoDB, self).tearDown()
         self.simulate_delete(self.pool)
         self.assertEqual(self.srmock.status, falcon.HTTP_204)
 
@@ -156,11 +161,15 @@ class PoolsBaseTest(base.V1Base):
 
     def _pool_expect(self, pool, xhref, xweight, xuri):
         self.assertIn('href', pool)
+        self.assertIn('name', pool)
         self.assertEqual(pool['href'], xhref)
         self.assertIn('weight', pool)
         self.assertEqual(pool['weight'], xweight)
         self.assertIn('uri', pool)
-        self.assertEqual(pool['uri'], xuri)
+
+        # NOTE(dynarro): we are using startwith because we are adding to
+        # pools UUIDs, to avoid dupplications
+        self.assertTrue(pool['uri'].startswith(xuri))
 
     def test_get_works(self):
         result = self.simulate_get(self.pool)
@@ -323,20 +332,3 @@ class PoolsBaseTest(base.V1Base):
             self.assertEqual(len(pool_list), 6)
             path, weight = expected[4][:2]
             self._pool_expect(pool_list[0], path, weight, self.doc['uri'])
-
-
-class TestPoolsMongoDB(PoolsBaseTest):
-
-    config_file = 'wsgi_mongodb_pooled.conf'
-
-    @testing.requires_mongodb
-    def setUp(self):
-        super(TestPoolsMongoDB, self).setUp()
-
-
-class TestPoolsSqlalchemy(PoolsBaseTest):
-
-    config_file = 'wsgi_sqlalchemy_pooled.conf'
-
-    def setUp(self):
-        super(TestPoolsSqlalchemy, self).setUp()

@@ -19,34 +19,6 @@ metadata = sa.MetaData()
 
 now = timeutils.utcnow
 
-
-Messages = sa.Table('Messages', metadata,
-                    sa.Column('id', sa.INTEGER, primary_key=True),
-                    sa.Column('qid', sa.INTEGER,
-                              sa.ForeignKey("Queues.id", ondelete="CASCADE"),
-                              nullable=False),
-                    sa.Column('ttl', sa.INTEGER),
-                    sa.Column('body', sa.LargeBinary),
-                    sa.Column('client', sa.TEXT),
-                    sa.Column('created', sa.TIMESTAMP,
-                              default=now, onupdate=now),
-                    sa.Column('cid', sa.INTEGER,
-                              sa.ForeignKey("Claims.id", ondelete='SET NULL')),
-                    )
-
-
-Claims = sa.Table('Claims', metadata,
-                  sa.Column('id', sa.INTEGER, primary_key=True,
-                            autoincrement=True),
-                  sa.Column('qid', sa.INTEGER,
-                            sa.ForeignKey("Queues.id", ondelete="CASCADE"),
-                            nullable=False),
-                  sa.Column('ttl', sa.INTEGER),
-                  sa.Column('created', sa.TIMESTAMP,
-                            default=now, onupdate=now),
-                  )
-
-
 Queues = sa.Table('Queues', metadata,
                   sa.Column('id', sa.INTEGER, primary_key=True),
                   sa.Column('project', sa.String(64)),
@@ -58,10 +30,20 @@ Queues = sa.Table('Queues', metadata,
 
 Pools = sa.Table('Pools', metadata,
                  sa.Column('name', sa.String(64), primary_key=True),
-                 sa.Column('group', sa.String(64), nullable=True),
-                 sa.Column('uri', sa.String(255), nullable=False),
+                 sa.Column('group', sa.String(64),
+                           unique=True, nullable=True),
+                 sa.Column('uri', sa.String(255),
+                           unique=True, nullable=False),
                  sa.Column('weight', sa.INTEGER, nullable=False),
                  sa.Column('options', sa.BINARY))
+
+Flavors = sa.Table('Flavors', metadata,
+                   sa.Column('name', sa.String(64), primary_key=True),
+                   sa.Column('project', sa.String(64)),
+                   sa.Column('pool', sa.ForeignKey('Pools.group',
+                                                   ondelete='CASCADE'),
+                             nullable=False),
+                   sa.Column('capabilities', sa.BINARY))
 
 
 Catalogue = sa.Table('Catalogue', metadata,

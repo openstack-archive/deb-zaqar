@@ -13,6 +13,12 @@
 # the License.
 
 from zaqar.api.v1_1 import endpoints
+from zaqar.api.v1_1 import request as schema_validator
+
+from zaqar.common.api import request
+from zaqar.common.api import response
+from zaqar.common import errors
+from zaqar.common import urls
 
 
 class Handler(object):
@@ -21,9 +27,87 @@ class Handler(object):
     The handler validates and process the requests
     """
 
-    def __init__(self, storage, control, validate):
-        self.v1_1_endpoints = endpoints.Endpoints(storage, control, validate)
+    _actions_mapping = {
+        'message_list': 'GET',
+        'message_get': 'GET',
+        'message_get_many': 'GET',
+        'message_post': 'POST',
+        'message_delete': 'DELETE',
+        'message_delete_many': 'DELETE'
+    }
+
+    def __init__(self, storage, control, validate, defaults):
+        self.v1_1_endpoints = endpoints.Endpoints(storage, control,
+                                                  validate, defaults)
 
     def process_request(self, req):
         # FIXME(vkmc): Control API version
         return getattr(self.v1_1_endpoints, req._action)(req)
+
+    @staticmethod
+    def validate_request(payload, req):
+        """Validate a request and its payload against a schema.
+
+        :return: a Response object if validation failed, None otherwise.
+        """
+        try:
+            action = payload.get('action')
+            validator = schema_validator.RequestSchema()
+            is_valid = validator.validate(action=action, body=payload)
+        except errors.InvalidAction as ex:
+            body = {'error': str(ex)}
+            headers = {'status': 400}
+            return response.Response(req, body, headers)
+        else:
+            if not is_valid:
+                body = {'error': 'Schema validation failed.'}
+                headers = {'status': 400}
+                return response.Response(req, body, headers)
+
+    def create_response(self, code, body, req=None):
+        if req is None:
+            req = self.create_request()
+        headers = {'status': code}
+        return response.Response(req, body, headers)
+
+    @staticmethod
+    def create_request(payload=None):
+        if payload is None:
+            payload = {}
+        action = payload.get('action')
+        body = payload.get('body', {})
+        headers = payload.get('headers')
+
+        return request.Request(action=action, body=body,
+                               headers=headers, api="v1.1")
+
+    def get_defaults(self):
+        return self.v1_1_endpoints._defaults
+
+    def verify_signature(self, key, payload):
+        action = payload.get('action')
+        method = self._actions_mapping.get(action)
+
+        queue_name = payload.get('body', {}).get('queue_name')
+        path = '/v2/queues/%(queue_name)s/messages' % {
+            'queue_name': queue_name}
+
+        headers = payload.get('headers', {})
+        project = headers.get('X-Project-ID')
+        expires = headers.get('URL-Expires')
+        methods = headers.get('URL-Methods')
+        signature = headers.get('URL-Signature')
+
+        if not method or method not in methods:
+            return False
+
+        try:
+            verified = urls.verify_signed_headers_data(key, path,
+                                                       project=project,
+                                                       methods=methods,
+                                                       expires=expires,
+                                                       signature=signature)
+        except ValueError:
+            return False
+
+        return verified

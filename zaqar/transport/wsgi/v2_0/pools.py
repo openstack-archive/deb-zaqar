@@ -38,11 +38,11 @@ registered, there is an optional field:
 
 import falcon
 import jsonschema
+from oslo_log import log
 
 from zaqar.common.api.schemas import pools as schema
 from zaqar.common import utils as common_utils
 from zaqar.i18n import _
-from zaqar.openstack.common import log
 from zaqar.storage import errors
 from zaqar.storage import utils as storage_utils
 from zaqar.transport import utils as transport_utils
@@ -89,20 +89,21 @@ class Listing(object):
         cursor = self._ctrl.list(**store)
         pools = list(next(cursor))
 
-        results = {}
+        results = {'links': []}
 
         if pools:
             store['marker'] = next(cursor)
 
             for entry in pools:
-                entry['href'] = request.path + '/' + entry.pop('name')
+                entry['href'] = request.path + '/' + entry['name']
 
-        results['links'] = [
-            {
-                'rel': 'next',
-                'href': request.path + falcon.to_query_str(store)
-            }
-        ]
+            results['links'] = [
+                {
+                    'rel': 'next',
+                    'href': request.path + falcon.to_query_str(store)
+                }
+            ]
+
         results['pools'] = pools
 
         response.content_location = request.relative_uri
@@ -150,8 +151,6 @@ class Resource(object):
 
         data['href'] = request.path
 
-        # remove the name entry - it isn't needed on GET
-        del data['name']
         response.body = transport_utils.to_json(data)
 
     def on_put(self, request, response, project_id, pool):

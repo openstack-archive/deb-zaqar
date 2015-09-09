@@ -18,12 +18,12 @@ import functools
 import sys
 import time
 
+from oslo_log import log as logging
 from oslo_utils import encodeutils
 import redis
 import six
 
 from zaqar.i18n import _
-from zaqar.openstack.common import log as logging
 from zaqar.storage import errors
 
 LOG = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ def raises_conn_error(func):
     """Handles the Redis ConnectionFailure error.
 
     This decorator catches Redis's ConnectionError
-    and raises Marconi's ConnectionError instead.
+    and raises Zaqar's ConnectionError instead.
     """
 
     # Note(prashanthr_) : Try to reuse this utility. Violates DRY

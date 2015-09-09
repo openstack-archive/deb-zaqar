@@ -14,10 +14,10 @@
 # limitations under the License.
 
 import falcon
+from oslo_log import log as logging
 import six
 
 from zaqar.i18n import _
-import zaqar.openstack.common.log as logging
 from zaqar.storage import errors as storage_errors
 from zaqar.transport import utils
 from zaqar.transport import validation
@@ -84,6 +84,8 @@ class ItemResource(object):
 
         if req.content_length:
             document = wsgi_utils.deserialize(req.stream, req.content_length)
+        else:
+            document = {}
 
         try:
             self._validate.subscription_patching(document)
@@ -167,6 +169,8 @@ class CollectionResource(object):
 
         if req.content_length:
             document = wsgi_utils.deserialize(req.stream, req.content_length)
+        else:
+            document = {}
 
         try:
             self._validate.subscription_posting(document)
@@ -192,3 +196,6 @@ class CollectionResource(object):
 
         resp.status = falcon.HTTP_201 if created else falcon.HTTP_409
         resp.location = req.path
+        if created:
+            resp.body = utils.to_json(
+                {'subscription_id': six.text_type(created)})

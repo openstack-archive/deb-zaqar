@@ -17,10 +17,12 @@ import os
 
 import fixtures
 from oslo_config import cfg
+from oslo_log import log
 import six
 import testtools
 
-from zaqar import bootstrap
+from zaqar.common import configs
+from zaqar.tests import helpers
 
 
 class TestBase(testtools.TestCase):
@@ -46,13 +48,15 @@ class TestBase(testtools.TestCase):
             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
         if self.config_file:
+            self.config_file = helpers.override_mongo_conf(
+                self.config_file, self)
             self.conf = self.load_conf(self.config_file)
         else:
             self.conf = cfg.ConfigOpts()
 
-        self.conf.register_opts(bootstrap._GENERAL_OPTIONS)
-        self.conf.register_opts(bootstrap._DRIVER_OPTIONS,
-                                group=bootstrap._DRIVER_GROUP)
+        self.conf.register_opts(configs._GENERAL_OPTIONS)
+        self.conf.register_opts(configs._DRIVER_OPTIONS,
+                                group=configs._DRIVER_GROUP)
 
     @classmethod
     def conf_path(cls, filename):
@@ -77,6 +81,7 @@ class TestBase(testtools.TestCase):
         :returns: Project's config object.
         """
         conf = cfg.ConfigOpts()
+        log.register_options(conf)
         conf(args=[], default_config_files=[cls.conf_path(filename)])
         return conf
 

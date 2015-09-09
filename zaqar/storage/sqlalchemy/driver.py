@@ -57,7 +57,8 @@ class ControlDriver(storage.ControlDriverBase):
             sa.event.listen(engine, 'connect',
                             self._sqlite_on_connect)
 
-        if uri.startswith('mysql://'):
+        if (uri.startswith('mysql://') or
+                uri.startswith('mysql+pymysql://')):
             sa.event.listen(engine, 'connect',
                             self._mysql_on_connect)
 
@@ -71,6 +72,9 @@ class ControlDriver(storage.ControlDriverBase):
     def connection(self):
         return self.engine.connect()
 
+    def run(self, *args, **kwargs):
+        return self.connection.execute(*args, **kwargs)
+
     def close_connection(self):
         self.connection.close()
 
@@ -79,13 +83,16 @@ class ControlDriver(storage.ControlDriverBase):
         return controllers.PoolsController(self)
 
     @property
+    def queue_controller(self):
+        return controllers.QueueController(self)
+
+    @property
     def catalogue_controller(self):
         return controllers.CatalogueController(self)
 
     @property
     def flavors_controller(self):
-        # NOTE(flaper87): Needed to avoid `abc` errors.
-        pass
+        return controllers.FlavorsController(self)
 
     @property
     def subscriptions_controller(self):

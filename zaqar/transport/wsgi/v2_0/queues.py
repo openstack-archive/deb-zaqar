@@ -14,10 +14,10 @@
 # limitations under the License.
 
 import falcon
+from oslo_log import log as logging
 import six
 
 from zaqar.i18n import _
-import zaqar.openstack.common.log as logging
 from zaqar.storage import errors as storage_errors
 from zaqar.transport import utils
 from zaqar.transport import validation
@@ -149,14 +149,18 @@ class CollectionResource(object):
         for each_queue in queues:
             each_queue['href'] = req.path + '/' + each_queue['name']
 
-        response_body = {
-            'queues': queues,
-            'links': [
+        links = []
+        if queues:
+            links = [
                 {
                     'rel': 'next',
                     'href': req.path + falcon.to_query_str(kwargs)
                 }
             ]
+
+        response_body = {
+            'queues': queues,
+            'links': links
         }
 
         resp.body = utils.to_json(response_body)

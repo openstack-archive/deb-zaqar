@@ -79,10 +79,13 @@ def flavors(test, count, pool):
 
 
 @ddt.ddt
-class FlavorsBaseTest(base.V2Base):
+class TestFlavorsMongoDB(base.V2Base):
 
+    config_file = 'wsgi_mongodb_pooled.conf'
+
+    @testing.requires_mongodb
     def setUp(self):
-        super(FlavorsBaseTest, self).setUp()
+        super(TestFlavorsMongoDB, self).setUp()
         self.queue = 'test-queue'
         self.queue_path = self.url_prefix + '/queues/' + self.queue
 
@@ -91,7 +94,7 @@ class FlavorsBaseTest(base.V2Base):
         self.pool_path = self.url_prefix + '/pools/' + self.pool
         self.pool_doc = {'weight': 100,
                          'group': self.pool_group,
-                         'uri': 'mongodb://localhost:27017'}
+                         'uri': 'mongodb://localhost:27017/test'}
         self.simulate_put(self.pool_path, body=jsonutils.dumps(self.pool_doc))
 
         self.flavor = 'test-flavor'
@@ -101,12 +104,12 @@ class FlavorsBaseTest(base.V2Base):
         self.assertEqual(self.srmock.status, falcon.HTTP_201)
 
     def tearDown(self):
-        super(FlavorsBaseTest, self).tearDown()
         self.simulate_delete(self.pool_path)
         self.simulate_delete(self.flavor_path)
         self.assertEqual(self.srmock.status, falcon.HTTP_204)
 
         self.simulate_delete(self.queue_path)
+        super(TestFlavorsMongoDB, self).tearDown()
 
     def test_put_flavor_works(self):
         name = str(uuid.uuid1())
@@ -171,6 +174,7 @@ class FlavorsBaseTest(base.V2Base):
 
     def _flavor_expect(self, flavor, xhref, xpool):
         self.assertIn('href', flavor)
+        self.assertIn('name', flavor)
         self.assertEqual(flavor['href'], xhref)
         self.assertIn('pool', flavor)
         self.assertEqual(flavor['pool'], xpool)
@@ -324,12 +328,3 @@ class FlavorsBaseTest(base.V2Base):
 
         self.simulate_put(self.queue_path, body=jsonutils.dumps(metadata))
         self.assertEqual(self.srmock.status, falcon.HTTP_400)
-
-
-class TestFlavorsMongoDB(FlavorsBaseTest):
-
-    config_file = 'wsgi_mongodb_pooled.conf'
-
-    @testing.requires_mongodb
-    def setUp(self):
-        super(TestFlavorsMongoDB, self).setUp()

@@ -47,8 +47,7 @@ class SubscriptionController(base.Subscription):
     def __init__(self, *args, **kwargs):
         super(SubscriptionController, self).__init__(*args, **kwargs)
         self._collection = self.driver.subscriptions_database.subscriptions
-        queue_col = self.driver.control_driver.queues_database.queues
-        self._queue_collection = queue_col
+        self._queue_ctrl = self.driver.queue_controller
         self._collection.ensure_index(SUBSCRIPTIONS_INDEX, unique=True)
 
     @utils.raises_conn_error
@@ -58,9 +57,9 @@ class SubscriptionController(base.Subscription):
         if marker is not None:
             query['_id'] = {'$gt': utils.to_oid(marker)}
 
-        fields = {'s': 1, 'u': 1, 't': 1, 'p': 1, 'o': 1, '_id': 1}
+        projection = {'s': 1, 'u': 1, 't': 1, 'p': 1, 'o': 1, '_id': 1}
 
-        cursor = self._collection.find(query, fields=fields)
+        cursor = self._collection.find(query, projection=projection)
         cursor = cursor.limit(limit).sort('_id')
         marker_name = {}
 
@@ -95,12 +94,9 @@ class SubscriptionController(base.Subscription):
         now = timeutils.utcnow_ts()
         ttl = int(ttl)
         expires = now + ttl
-        source_query = {'p_q': utils.scope_queue_name(source, project)}
-        target_source = self._queue_collection.find_one(source_query,
-                                                        fields={'m': 1,
-                                                                '_id': 0})
-        if target_source is None:
-            raise errors.QueueDoesNotExist(target_source, project)
+
+        if not self._queue_ctrl.exists(source, project):
+            raise errors.QueueDoesNotExist(source, project)
         try:
             subscription_id = self._collection.insert({'s': source,
                                                        'u': subscriber,

@@ -15,6 +15,7 @@
 from oslo_serialization import jsonutils
 
 from zaqar import bootstrap
+from zaqar.common import configs
 from zaqar import tests as testing
 from zaqar.transport import validation
 from zaqar.transport.websocket import driver
@@ -30,20 +31,21 @@ class TestBase(testing.TestBase):
         if not self.config_file:
             self.skipTest("No config specified")
 
-        self.conf.register_opts(bootstrap._GENERAL_OPTIONS)
+        self.conf.register_opts(configs._GENERAL_OPTIONS)
         self.conf.register_opts(validation._TRANSPORT_LIMITS_OPTIONS,
                                 group=validation._TRANSPORT_LIMITS_GROUP)
         self.transport_cfg = self.conf[validation._TRANSPORT_LIMITS_GROUP]
 
         self.conf.register_opts(driver._WS_OPTIONS,
                                 group=driver._WS_GROUP)
-        self.wsgi_cfg = self.conf[driver._WS_GROUP]
+        self.ws_cfg = self.conf[driver._WS_GROUP]
 
         self.conf.unreliable = True
         self.conf.admin_mode = True
         self.boot = bootstrap.Bootstrap(self.conf)
 
         self.transport = self.boot.transport
+        self.api = self.boot.api
 
     def tearDown(self):
         if self.conf.pooling:

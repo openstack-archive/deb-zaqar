@@ -14,27 +14,25 @@
 # limitations under the License.
 
 from oslo_config import cfg
+from oslo_log import log
 from stevedore import driver
 
 from zaqar.api import handler
+from zaqar.common import configs
 from zaqar.common import decorators
 from zaqar.common import errors
-from zaqar.i18n import _
 from zaqar.openstack.common.cache import cache as oslo_cache
-from zaqar.openstack.common import log
 from zaqar.storage import pipeline
 from zaqar.storage import pooling
 from zaqar.storage import utils as storage_utils
+from zaqar.transport import base
 from zaqar.transport import validation
 
 LOG = log.getLogger(__name__)
 
 
-ADMIN_MODE_OPT = cfg.BoolOpt('admin_mode', default=False,
-                             help='Activate privileged endpoints.')
-
 _CLI_OPTIONS = (
-    ADMIN_MODE_OPT,
+    configs._ADMIN_MODE_OPT,
     cfg.BoolOpt('daemon', default=False,
                 help='Run Zaqar server in the background.'),
 )
@@ -43,32 +41,7 @@ _CLI_OPTIONS = (
 # zaqar-server
 CONF = cfg.CONF
 CONF.register_cli_opts(_CLI_OPTIONS)
-
-_GENERAL_OPTIONS = (
-    ADMIN_MODE_OPT,
-    cfg.BoolOpt('pooling', default=False,
-                help=('Enable pooling across multiple storage backends. '
-                      'If pooling is enabled, the storage driver '
-                      'configuration is used to determine where the '
-                      'catalogue/control plane data is kept.'),
-                deprecated_opts=[cfg.DeprecatedOpt('sharding')]),
-    cfg.BoolOpt('unreliable', default=None,
-                help='Disable all reliability constrains.'),
-)
-
-_DRIVER_OPTIONS = (
-    cfg.StrOpt('transport', default='wsgi',
-               help='Transport driver to use.'),
-    cfg.StrOpt('storage', default='mongodb',
-               help='Storage driver to use.'),
-)
-
-_DRIVER_GROUP = 'drivers'
-
-
-def _config_options():
-    return [(None, _GENERAL_OPTIONS),
-            (_DRIVER_GROUP, _DRIVER_OPTIONS)]
+log.register_options(CONF)
 
 
 class Bootstrap(object):
@@ -80,25 +53,20 @@ class Bootstrap(object):
 
     def __init__(self, conf):
         self.conf = conf
-        self.conf.register_opts(_GENERAL_OPTIONS)
-        self.conf.register_opts(_DRIVER_OPTIONS, group=_DRIVER_GROUP)
-        self.driver_conf = self.conf[_DRIVER_GROUP]
 
-        log.setup('zaqar')
+        for group, opts in configs._config_options():
+            self.conf.register_opts(opts, group=group)
 
-        if self.conf.unreliable is None:
-            msg = _(u'Unreliable\'s default value will be changed to False '
-                    'in the Kilo release. Please, make sure your deployments '
-                    'are working in a reliable mode or that `unreliable` is '
-                    'explicitly set to `True` in your configuration files.')
-            LOG.warn(msg)
-            self.conf.unreliable = True
+        self.driver_conf = self.conf[configs._DRIVER_GROUP]
+
+        log.setup(conf, 'zaqar')
 
     @decorators.lazy_property(write=False)
     def api(self):
         LOG.debug(u'Loading API handler')
         validate = validation.Validator(self.conf)
-        return handler.Handler(self.storage, self.control, validate)
+        defaults = base.ResourceDefaults(self.conf)
+        return handler.Handler(self.storage, self.control, validate, defaults)
 
     @decorators.lazy_property(write=False)
     def storage(self):
@@ -156,6 +124,9 @@ class Bootstrap(object):
             return mgr.driver
         except RuntimeError as exc:
             LOG.exception(exc)
+            LOG.error(u'Failed to load transport driver zaqar.transport.'
+                      u'%(driver)s with args %(args)s',
+                      {'driver': transport_name, 'args': args})
             raise errors.InvalidDriver(exc)
 
     def run(self):

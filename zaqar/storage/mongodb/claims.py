@@ -24,9 +24,9 @@ Field Mappings:
 import datetime
 
 from bson import objectid
+from oslo_log import log as logging
 from oslo_utils import timeutils
 
-import zaqar.openstack.common.log as logging
 from zaqar import storage
 from zaqar.storage import errors
 from zaqar.storage.mongodb import utils
@@ -147,7 +147,7 @@ class ClaimController(storage.Claim):
 
         # Get a list of active, not claimed nor expired
         # messages that could be claimed.
-        msgs = msg_ctrl._active(queue, fields={'_id': 1}, project=project,
+        msgs = msg_ctrl._active(queue, projection={'_id': 1}, project=project,
                                 limit=limit)
 
         messages = iter([])

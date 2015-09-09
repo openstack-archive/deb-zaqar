@@ -33,6 +33,10 @@ POOLS_INDEX = [
     ('n', 1)
 ]
 
+URI_INDEX = [
+    ('u', 1)
+]
+
 # NOTE(cpp-cabrera): used for get/list operations. There's no need to
 # show the marker or the _id - they're implementation details.
 OMIT_FIELDS = (('_id', False),)
@@ -53,13 +57,18 @@ class PoolsController(base.PoolsBase):
                                name='pools_name',
                                unique=True)
 
+        self._col.ensure_index(URI_INDEX,
+                               background=True,
+                               name='pools_uri',
+                               unique=True)
+
     @utils.raises_conn_error
     def _list(self, marker=None, limit=10, detailed=False):
         query = {}
         if marker is not None:
             query['n'] = {'$gt': marker}
 
-        cursor = self._col.find(query, fields=_field_spec(detailed),
+        cursor = self._col.find(query, projection=_field_spec(detailed),
                                 limit=limit).sort('n')
         marker_name = {}
 
@@ -81,7 +90,7 @@ class PoolsController(base.PoolsBase):
 
     @utils.raises_conn_error
     def _get_group(self, group=None, detailed=False):
-        cursor = self._col.find({'g': group}, fields=_field_spec(detailed))
+        cursor = self._col.find({'g': group}, projection=_field_spec(detailed))
         normalizer = functools.partial(_normalize, detailed=detailed)
         return utils.HookedCursor(cursor, normalizer)
 

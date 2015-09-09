@@ -14,11 +14,11 @@
 # limitations under the License.
 
 import falcon
+from oslo_log import log as logging
 import six
 
 from zaqar.common.transport.wsgi import helpers as wsgi_helpers
 from zaqar.i18n import _
-import zaqar.openstack.common.log as logging
 from zaqar.storage import errors as storage_errors
 from zaqar.transport import utils
 from zaqar.transport import validation
@@ -131,14 +131,18 @@ class CollectionResource(object):
                                                        m['claim_id'])
                         for m in messages]
 
-        return {
-            'messages': messages,
-            'links': [
+        links = []
+        if messages:
+            links = [
                 {
                     'rel': 'next',
                     'href': req.path + falcon.to_query_str(kwargs)
                 }
             ]
+
+        return {
+            'messages': messages,
+            'links': links
         }
 
     # ----------------------------------------------------------------------
