@@ -37,6 +37,7 @@ ZAQAR_DIR=$DEST/zaqar
 ZAQARCLIENT_DIR=$DEST/python-zaqarclient
 ZAQAR_CONF_DIR=/etc/zaqar
 ZAQAR_CONF=$ZAQAR_CONF_DIR/zaqar.conf
+ZAQAR_POLICY_CONF=$ZAQAR_CONF_DIR/policy.json
 ZAQAR_UWSGI_CONF=$ZAQAR_CONF_DIR/uwsgi.conf
 ZAQAR_API_LOG_DIR=/var/log/zaqar
 ZAQAR_API_LOG_FILE=$ZAQAR_API_LOG_DIR/queues.log
@@ -112,6 +113,10 @@ function configure_zaqar {
     [ ! -d $ZAQAR_CONF_DIR ] && sudo mkdir -m 755 -p $ZAQAR_CONF_DIR
     sudo chown $USER $ZAQAR_CONF_DIR
 
+    if [[ -f $ZAQAR_DIR/etc/policy.json.sample ]]; then
+        cp -p $ZAQAR_DIR/etc/policy.json.sample $ZAQAR_POLICY_CONF
+    fi
+
     [ ! -d $ZAQAR_API_LOG_DIR ] &&  sudo mkdir -m 755 -p $ZAQAR_API_LOG_DIR
     sudo chown $USER $ZAQAR_API_LOG_DIR
 
@@ -119,9 +124,11 @@ function configure_zaqar {
     iniset $ZAQAR_CONF DEFAULT verbose True
     iniset $ZAQAR_CONF DEFAULT unreliable True
     iniset $ZAQAR_CONF DEFAULT admin_mode True
-    iniset $ZAQAR_CONF DEFAULT use_syslog $SYSLOG
-    iniset $ZAQAR_CONF DEFAULT auth_strategy keystone
     iniset $ZAQAR_CONF signed_url secret_key notreallysecret
+
+    if is_service_enabled key; then
+	iniset $ZAQAR_CONF DEFAULT auth_strategy keystone
+    fi
 
     iniset $ZAQAR_CONF storage message_pipeline zaqar.notification.notifier
 
@@ -133,9 +140,10 @@ function configure_zaqar {
 
     configure_auth_token_middleware $ZAQAR_CONF zaqar $ZAQAR_AUTH_CACHE_DIR
 
+    iniset $ZAQAR_CONF DEFAULT pooling True
+    iniset $ZAQAR_CONF 'pooling:catalog' enable_virtual_pool True
+
     if [ "$ZAQAR_BACKEND" = 'mongodb' ] ; then
-        iniset $ZAQAR_CONF DEFAULT pooling True
-        iniset $ZAQAR_CONF 'pooling:catalog' enable_virtual_pool True
         iniset $ZAQAR_CONF  drivers message_store mongodb
         iniset $ZAQAR_CONF 'drivers:message_store:mongodb' uri mongodb://localhost:27017/zaqar
         iniset $ZAQAR_CONF 'drivers:message_store:mongodb' database zaqar
@@ -145,6 +153,10 @@ function configure_zaqar {
         iniset $ZAQAR_CONF 'drivers:management_store:mongodb' database zaqar_mgmt
         configure_mongodb
     elif [ "$ZAQAR_BACKEND" = 'redis' ] ; then
+        iniset $ZAQAR_CONF  drivers management_store sqlalchemy
+        iniset $ZAQAR_CONF 'drivers:management_store:sqlalchemy' uri sqlite://
+        iniset $ZAQAR_CONF 'drivers:management_store:sqlalchemy' database zaqar_mgmt
+
         iniset $ZAQAR_CONF  drivers message_store redis
         iniset $ZAQAR_CONF 'drivers:message_store:redis' uri redis://localhost:6379
         iniset $ZAQAR_CONF 'drivers:message_store:redis' database zaqar
@@ -219,13 +231,8 @@ function install_zaqarclient {
 
 # start_zaqar() - Start running processes, including screen
 function start_zaqar {
-    if [[ "$USE_SCREEN" = "False" ]]; then
-        run_process zaqar-wsgi "uwsgi --ini $ZAQAR_UWSGI_CONF --daemonize $ZAQAR_API_LOG_DIR/uwsgi.log"
-        run_process zaqar-websocket "zaqar-server --config-file $ZAQAR_CONF --daemon"
-    else
-        run_process zaqar-wsgi "uwsgi --ini $ZAQAR_UWSGI_CONF"
-        run_process zaqar-websocket "zaqar-server --config-file $ZAQAR_CONF"
-    fi
+    run_process zaqar-wsgi "uwsgi --master --ini $ZAQAR_UWSGI_CONF"
+    run_process zaqar-websocket "zaqar-server --config-file $ZAQAR_CONF"
 
     echo "Waiting for Zaqar to start..."
     token=$(openstack token issue -c id -f value)

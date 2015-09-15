@@ -19,11 +19,13 @@ from wsgiref import simple_server
 import falcon
 from oslo_config import cfg
 from oslo_log import log as logging
+import six
 
 from zaqar.common import decorators
 from zaqar.common.transport.wsgi import helpers
 from zaqar.i18n import _
 from zaqar import transport
+from zaqar.transport import acl
 from zaqar.transport import auth
 from zaqar.transport import validation
 from zaqar.transport.wsgi import v1_0
@@ -98,6 +100,7 @@ class Driver(transport.DriverBase):
             ])
 
         self.app = falcon.API(before=self.before_hooks)
+        self.app.add_error_handler(Exception, self._error_handler)
 
         for version_path, endpoints in catalog:
             for route, resource in endpoints:
@@ -114,6 +117,15 @@ class Driver(transport.DriverBase):
             auth_app = strategy.install(self.app, self._conf)
 
         self.app = auth.SignedHeadersAuth(self.app, auth_app)
+
+        acl.setup_policy(self._conf)
+
+    def _error_handler(self, exc, request, response, params):
+        if isinstance(exc, falcon.HTTPError):
+            raise exc
+        LOG.exception(exc)
+        raise falcon.HTTPInternalServerError('Internal server error',
+                                             six.text_type(exc))
 
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""

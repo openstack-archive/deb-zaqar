@@ -790,7 +790,11 @@ class ClaimControllerTest(ControllerBaseTest):
 
         messages2 = list(messages2)
         self.assertEqual(len(messages2), 15)
-        self.assertEqual(messages, messages2)
+        for msg1, msg2 in zip(messages, messages2):
+            self.assertEqual(msg1['body'], msg2['body'])
+            self.assertEqual(msg1['claim_id'], msg2['claim_id'])
+            self.assertEqual(msg1['id'], msg2['id'])
+            self.assertEqual(msg1['ttl'], msg2['ttl'])
         self.assertEqual(claim['ttl'], 70)
         self.assertEqual(claim['id'], claim_id)
 
@@ -1258,8 +1262,15 @@ class CatalogueControllerTest(ControllerBaseTest):
     def setUp(self):
         super(CatalogueControllerTest, self).setUp()
         self.controller = self.driver.catalogue_controller
-        self.queue = six.text_type(uuid.uuid1())
-        self.project = six.text_type(uuid.uuid1())
+        self.pool_ctrl = self.driver.pools_controller
+        self.queue = six.text_type(uuid.uuid4())
+        self.project = six.text_type(uuid.uuid4())
+
+        self.pool = str(uuid.uuid1())
+        self.pool_group = str(uuid.uuid1())
+        self.pool_ctrl.create(self.pool, 100, 'localhost',
+                              group=self.pool_group, options={})
+        self.addCleanup(self.pool_ctrl.delete, self.pool)
 
     def tearDown(self):
         self.controller.drop_all()
@@ -1287,13 +1298,14 @@ class CatalogueControllerTest(ControllerBaseTest):
             self.fail('There should be no entries at this time')
 
         # create a listing, check its length
-        with helpers.pool_entries(self.controller, 10) as expect:
+        with helpers.pool_entries(self.controller,
+                                  self.pool_ctrl, 10) as expect:
             project = expect[0][0]
             xs = list(self.controller.list(project))
             self.assertEqual(len(xs), 10)
 
         # create, check existence, delete
-        with helpers.pool_entry(self.controller, project, queue, u'a'):
+        with helpers.pool_entry(self.controller, project, queue, self.pool):
             self.assertTrue(self.controller.exists(project, queue))
 
         # verify it no longer exists
@@ -1303,7 +1315,8 @@ class CatalogueControllerTest(ControllerBaseTest):
         self.assertEqual(len(list(self.controller.list(project))), 0)
 
     def test_list(self):
-        with helpers.pool_entries(self.controller, 10) as expect:
+        with helpers.pool_entries(self.controller,
+                                  self.pool_ctrl, 10) as expect:
             values = zip(self.controller.list(u'_'), expect)
             for e, x in values:
                 p, q, s = x
@@ -1311,12 +1324,18 @@ class CatalogueControllerTest(ControllerBaseTest):
                 self._check_value(e, xqueue=q, xproject=p, xpool=s)
 
     def test_update(self):
+        p2 = u'b'
+        self.pool_ctrl.create(p2, 100, '127.0.0.1',
+                              group=self.pool_group,
+                              options={})
+        self.addCleanup(self.pool_ctrl.delete, p2)
+
         with helpers.pool_entry(self.controller, self.project,
-                                self.queue, u'a') as expect:
+                                self.queue, self.pool) as expect:
             p, q, s = expect
-            self.controller.update(p, q, pool=u'b')
+            self.controller.update(p, q, pool=p2)
             entry = self.controller.get(p, q)
-            self._check_value(entry, xqueue=q, xproject=p, xpool=u'b')
+            self._check_value(entry, xqueue=q, xproject=p, xpool=p2)
 
     def test_update_raises_when_entry_does_not_exist(self):
         e = self.assertRaises(errors.QueueNotMapped,
@@ -1327,7 +1346,7 @@ class CatalogueControllerTest(ControllerBaseTest):
     def test_get(self):
         with helpers.pool_entry(self.controller,
                                 self.project,
-                                self.queue, u'a') as expect:
+                                self.queue, self.pool) as expect:
             p, q, s = expect
             e = self.controller.get(p, q)
             self._check_value(e, xqueue=q, xproject=p, xpool=s)
@@ -1350,7 +1369,7 @@ class CatalogueControllerTest(ControllerBaseTest):
     def test_exists(self):
         with helpers.pool_entry(self.controller,
                                 self.project,
-                                self.queue, u'a') as expect:
+                                self.queue, self.pool) as expect:
             p, q, _ = expect
             self.assertTrue(self.controller.exists(p, q))
             self.assertFalse(self.controller.exists('nada', 'not_here'))
@@ -1395,8 +1414,7 @@ class FlavorsControllerTest(ControllerBaseTest):
     def _flavors_expects(self, flavor, xname, xproject, xpool):
         self.assertIn('name', flavor)
         self.assertEqual(flavor['name'], xname)
-        self.assertIn('project', flavor)
-        self.assertEqual(flavor['project'], xproject)
+        self.assertNotIn('project', flavor)
         self.assertIn('pool', flavor)
         self.assertEqual(flavor['pool'], xpool)
 
@@ -1465,13 +1483,19 @@ class FlavorsControllerTest(ControllerBaseTest):
         res = self.flavors_controller.get(name, project=self.project,
                                           detailed=True)
 
+        p = 'olympic'
+        group = 'sports'
+        self.pools_controller.create(p, 100, 'localhost2',
+                                     group=group, options={})
+        self.addCleanup(self.pools_controller.delete, p)
+
         new_capabilities = {'fifo': False}
         self.flavors_controller.update(name, project=self.project,
-                                       pool='olympic',
+                                       pool=group,
                                        capabilities={'fifo': False})
         res = self.flavors_controller.get(name, project=self.project,
                                           detailed=True)
-        self._flavors_expects(res, name, self.project, 'olympic')
+        self._flavors_expects(res, name, self.project, group)
         self.assertEqual(res['capabilities'], new_capabilities)
 
     def test_delete_works(self):

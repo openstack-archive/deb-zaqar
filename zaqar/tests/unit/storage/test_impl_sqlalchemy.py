@@ -21,35 +21,32 @@ from zaqar import tests as testing
 from zaqar.tests.unit.storage import base
 
 
-# NOTE(flaper87): We'll need this after splitting queues
-# from the data driver
 class SqlalchemyQueueTests(base.QueueControllerTest):
     driver_class = sqlalchemy.ControlDriver
+    config_file = 'wsgi_sqlalchemy.conf'
     controller_class = controllers.QueueController
+    control_driver_class = sqlalchemy.ControlDriver
 
 
 class SqlalchemyPoolsTest(base.PoolsControllerTest):
+    config_file = 'wsgi_sqlalchemy.conf'
     driver_class = sqlalchemy.ControlDriver
     controller_class = controllers.PoolsController
-
-    def setUp(self):
-        super(SqlalchemyPoolsTest, self).setUp()
-        self.load_conf('wsgi_sqlalchemy.conf')
-
-    def tearDown(self):
-        super(SqlalchemyPoolsTest, self).tearDown()
+    control_driver_class = sqlalchemy.ControlDriver
 
 
 class SqlalchemyCatalogueTest(base.CatalogueControllerTest):
+    config_file = 'wsgi_sqlalchemy.conf'
     driver_class = sqlalchemy.ControlDriver
     controller_class = controllers.CatalogueController
+    control_driver_class = sqlalchemy.ControlDriver
 
-    def setUp(self):
-        super(SqlalchemyCatalogueTest, self).setUp()
-        self.load_conf('wsgi_sqlalchemy.conf')
 
-    def tearDown(self):
-        super(SqlalchemyCatalogueTest, self).tearDown()
+class SqlalchemyFlavorsTest(base.FlavorsControllerTest):
+    config_file = 'wsgi_sqlalchemy.conf'
+    driver_class = sqlalchemy.ControlDriver
+    controller_class = controllers.FlavorsController
+    control_driver_class = sqlalchemy.ControlDriver
 
 
 class MsgidTests(testing.TestBase):
