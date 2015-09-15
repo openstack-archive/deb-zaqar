@@ -24,6 +24,7 @@ Build-Depends-Indep: mongodb,
                      python-hacking (>= 0.10.0),
                      python-iso8601,
                      python-jsonschema,
+                     python-keystoneclient (>= 1:1.6.0),
                      python-keystonemiddleware (>= 2.0.0),
                      python-memcache (>= 1.56),
                      python-mock (>= 1.3),
@@ -34,6 +35,7 @@ Build-Depends-Indep: mongodb,
                      python-oslo.context (>= 0.2.0),
                      python-oslo.i18n (>= 1.5.0),
                      python-oslo.log (>= 1.8.0),
+                     python-oslo.policy (>= 0.5.0),
                      python-oslo.serialization (>= 1.4.0),
                      python-oslo.utils (>= 2.0.0),
                      python-oslosphinx (>= 2.5.0),
@@ -43,7 +45,7 @@ Build-Depends-Indep: mongodb,
                      python-redis,
                      python-requests (>= 2.5.2),
                      python-six (>= 1.9.0),
-                     python-sqlalchemy (>= 0.9.7),
+                     python-sqlalchemy (>= 0.9.9),
                      python-stevedore (>= 1.5.0),
                      python-testtools (>= 1.4.0),
                      python-trollius,
@@ -73,13 +75,14 @@ Depends: python-autobahn (>= 0.10.1),
          python-oslo.context (>= 0.2.0),
          python-oslo.i18n (>= 1.5.0),
          python-oslo.log (>= 1.8.0),
+         python-oslo.policy (>= 0.5.0),
          python-oslo.serialization (>= 1.4.0),
          python-oslo.utils (>= 2.0.0),
          python-pbr (>= 1.6),
          python-posix-ipc,
          python-requests (>= 2.5.2),
          python-six (>= 1.9.0),
-         python-sqlalchemy (>= 0.9.7),
+         python-sqlalchemy (>= 0.9.9),
          python-stevedore (>= 1.5.0),
          python-trollius,
          python-webob,
@@ -87,8 +90,8 @@ Depends: python-autobahn (>= 0.10.1),
          ${python:Depends},
 Description: OpenStack Queueing as a Service - Python libraries
  Zaqar is a multi-tenant cloud messaging service for web developers. It
- combines the ideas pioneered by Amazon's SQS product with additional
- semantics to support event broadcasting.
+ combines the ideas pioneered by Amazon's SQS product with additional semantics
+ to support event broadcasting.
  .
  The service features a fully RESTful API, which developers can use to send
  messages between various components of their SaaS and mobile applications, by
@@ -97,7 +100,8 @@ Description: OpenStack Queueing as a Service - Python libraries
  .
  Other OpenStack components can integrate with Zaqar to surface events to end
  users and to communicate with guest agents that run in the "over-cloud" layer.
- Cloud operators can leverage Zaqar to provide equivalents of SQS and SNS to their customers.
+ Cloud operators can leverage Zaqar to provide equivalents of SQS and SNS to
+ their customers.
  .
  By installing python-zaqarclient you get programmatic access to the Zaqar v1.0
  API library. Plus, it installs a plugin to python-openstackclient that allows
@@ -117,8 +121,8 @@ Depends: adduser,
 Provides: ${python:Provides}
 Description: OpenStack Queueing as a Service - common files
  Zaqar is a multi-tenant cloud messaging service for web developers. It
- combines the ideas pioneered by Amazon's SQS product with additional
- semantics to support event broadcasting.
+ combines the ideas pioneered by Amazon's SQS product with additional semantics
+ to support event broadcasting.
  .
  The service features a fully RESTful API, which developers can use to send
  messages between various components of their SaaS and mobile applications, by
@@ -127,7 +131,8 @@ Description: OpenStack Queueing as a Service - common files
  .
  Other OpenStack components can integrate with Zaqar to surface events to end
  users and to communicate with guest agents that run in the "over-cloud" layer.
- Cloud operators can leverage Zaqar to provide equivalents of SQS and SNS to their customers.
+ Cloud operators can leverage Zaqar to provide equivalents of SQS and SNS to
+ their customers.
  .
  By installing python-zaqarclient you get programmatic access to the Zaqar v1.0
  API library. Plus, it installs a plugin to python-openstackclient that allows
@@ -147,8 +152,8 @@ Depends: adduser,
          ${python:Depends}
 Description: OpenStack Queueing as a Service - API server
  Zaqar is a multi-tenant cloud messaging service for web developers. It
- combines the ideas pioneered by Amazon's SQS product with additional
- semantics to support event broadcasting.
+ combines the ideas pioneered by Amazon's SQS product with additional semantics
+ to support event broadcasting.
  .
  The service features a fully RESTful API, which developers can use to send
  messages between various components of their SaaS and mobile applications, by
@@ -157,7 +162,8 @@ Description: OpenStack Queueing as a Service - API server
  .
  Other OpenStack components can integrate with Zaqar to surface events to end
  users and to communicate with guest agents that run in the "over-cloud" layer.
- Cloud operators can leverage Zaqar to provide equivalents of SQS and SNS to their customers.
+ Cloud operators can leverage Zaqar to provide equivalents of SQS and SNS to
+ their customers.
  .
  By installing python-zaqarclient you get programmatic access to the Zaqar v1.0
  API library. Plus, it installs a plugin to python-openstackclient that allows
