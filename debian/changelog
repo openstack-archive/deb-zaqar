@@ -1,3 +1,9 @@
+zaqar (1.0.0~rc1-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 24 Sep 2015 18:25:29 +0200
+
 zaqar (1.0.0~b3+2015.09.15.git45.5a332eadbf-1) unstable; urgency=medium
 
   * Initial release. (Closes: #787182)
