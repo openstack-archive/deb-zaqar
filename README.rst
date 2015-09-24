@@ -1,3 +1,4 @@
+=====
 Zaqar
 =====
 
@@ -36,7 +37,7 @@ sudo yum install gcc python-pip libxml2-devel libxslt-devel
 4. Find ``[drivers]`` section in ``~/.zaqar/zaqar.conf``
    and specify to use mongodb storage::
 
-    message_storage = mongodb
+    message_store = mongodb
     management_store = mongodb
 
    Then find the ``[drivers:message_store:mongodb]`` and
@@ -51,10 +52,10 @@ sudo yum install gcc python-pip libxml2-devel libxslt-devel
 
     uri = mongodb://127.0.0.1:27017
 
-5. For logging, find the ``[DEFAULT]`` section in
-   ``~/.zaqar/zaqar.conf`` and modify as desired::
+5. For logging, find the ``[handler_file]`` section in 
+   ``~/.zaqar/logging.conf`` and modify as desired::
 
-    log_file = server.log
+    args=('zaqar.log', 'w')
 
 6. Change directories back to your local copy of the repo::
 

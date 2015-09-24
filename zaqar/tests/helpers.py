@@ -173,7 +173,7 @@ def pool_entry(controller, project, queue, pool):
 
 
 @contextlib.contextmanager
-def pool_entries(controller, count):
+def pool_entries(controller, pool_ctrl, count):
     """Context manager to create several catalogue entries for testing.
 
     The entries are automatically deleted when the context manager
@@ -190,12 +190,14 @@ def pool_entries(controller, count):
             for i in range(count)]
 
     for p, q, s in spec:
+        pool_ctrl.create(s, 100, s)
         controller.insert(p, q, s)
 
     yield spec
 
-    for p, q, _ in spec:
+    for p, q, s in spec:
         controller.delete(p, q)
+        pool_ctrl.delete(s)
 
 
 def requires_mongodb(test_case):
@@ -268,6 +270,9 @@ def override_mongo_conf(conf_file, test):
             if not parser.has_section(section):
                 parser.add_section(section)
             parser.set(section, 'uri', test_mongo_url)
+        if not parser.has_section('oslo_policy'):
+            parser.add_section('oslo_policy')
+        parser.set('oslo_policy', 'policy_file', test.conf_path('policy.json'))
         fd, path = tempfile.mkstemp()
         conf_fd = os.fdopen(fd, 'w')
         try:

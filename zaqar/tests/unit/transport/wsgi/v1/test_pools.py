@@ -87,7 +87,7 @@ class TestPoolsMongoDB(base.V1Base):
     @testing.requires_mongodb
     def setUp(self):
         super(TestPoolsMongoDB, self).setUp()
-        self.doc = {'weight': 100, 'uri': 'mongodb://localhost:27017'}
+        self.doc = {'weight': 100, 'uri': self.mongodb_url}
         self.pool = self.url_prefix + '/pools/' + str(uuid.uuid1())
         self.simulate_put(self.pool, body=jsonutils.dumps(self.doc))
         self.assertEqual(self.srmock.status, falcon.HTTP_201)
@@ -110,7 +110,7 @@ class TestPoolsMongoDB(base.V1Base):
 
         self.simulate_put(path,
                           body=jsonutils.dumps(
-                              {'uri': 'mongodb://localhost:27017'}))
+                              {'uri': self.mongodb_url}))
         self.assertEqual(self.srmock.status, falcon.HTTP_400)
 
     @ddt.data(-1, 2**32+1, 'big')
@@ -180,7 +180,7 @@ class TestPoolsMongoDB(base.V1Base):
 
     def test_detailed_get_works(self):
         result = self.simulate_get(self.pool,
-                                   query_string='?detailed=True')
+                                   query_string='detailed=True')
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
         pool = jsonutils.loads(result[0])
         self._pool_expect(pool, self.pool, self.doc['weight'],
@@ -199,7 +199,7 @@ class TestPoolsMongoDB(base.V1Base):
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
 
         result = self.simulate_get(self.pool,
-                                   query_string='?detailed=True')
+                                   query_string='detailed=True')
         self.assertEqual(self.srmock.status, falcon.HTTP_200)
         pool = jsonutils.loads(result[0])
         self._pool_expect(pool, self.pool, doc['weight'],
@@ -208,13 +208,13 @@ class TestPoolsMongoDB(base.V1Base):
 
     def test_patch_works(self):
         doc = {'weight': 101,
-               'uri': 'mongodb://localhost:27017',
+               'uri': self.mongodb_url,
                'options': {'a': 1}}
         self._patch_test(doc)
 
     def test_patch_works_with_extra_fields(self):
         doc = {'weight': 101,
-               'uri': 'mongodb://localhost:27017',
+               'uri': self.mongodb_url,
                'options': {'a': 1},
                'location': 100, 'partition': 'taco'}
         self._patch_test(doc)
@@ -255,7 +255,7 @@ class TestPoolsMongoDB(base.V1Base):
         # NOTE(cpp-cabrera): delete initial pool - it will interfere
         # with listing tests
         self.simulate_delete(self.pool)
-        query = '?limit={0}&detailed={1}'.format(limit, detailed)
+        query = 'limit={0}&detailed={1}'.format(limit, detailed)
         if marker:
             query += '&marker={0}'.format(marker)
 
@@ -271,12 +271,12 @@ class TestPoolsMongoDB(base.V1Base):
 
             link = results['links'][0]
             self.assertEqual('next', link['rel'])
-            href = falcon.uri.parse_query_string(link['href'])
+            href = falcon.uri.parse_query_string(link['href'].split('?')[1])
             self.assertIn('marker', href)
             self.assertEqual(href['limit'], str(limit))
             self.assertEqual(href['detailed'], str(detailed).lower())
 
-            next_query_string = ('?marker={marker}&limit={limit}'
+            next_query_string = ('marker={marker}&limit={limit}'
                                  '&detailed={detailed}').format(**href)
             next_result = self.simulate_get(link['href'].split('?')[0],
                                             query_string=next_query_string)
@@ -326,7 +326,7 @@ class TestPoolsMongoDB(base.V1Base):
 
         with pools(self, 10, self.doc['uri']) as expected:
             result = self.simulate_get(self.url_prefix + '/pools',
-                                       query_string='?marker=3')
+                                       query_string='marker=3')
             self.assertEqual(self.srmock.status, falcon.HTTP_200)
             pool_list = jsonutils.loads(result[0])['pools']
             self.assertEqual(len(pool_list), 6)

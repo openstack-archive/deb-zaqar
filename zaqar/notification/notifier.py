@@ -19,6 +19,8 @@ import futurist
 from oslo_log import log as logging
 from six.moves import urllib_parse
 
+from zaqar.storage import pooling
+
 LOG = logging.getLogger(__name__)
 
 
@@ -29,24 +31,24 @@ class NotifierDriver(object):
 
     def __init__(self, *args, **kwargs):
         self.subscription_controller = kwargs.get('subscription_controller')
-        try:
-            self.executor = futurist.GreenThreadPoolExecutor()
-        except RuntimeError:
-            # TODO(flwang): Make the max_workers configurable
-            self.executor = futurist.ThreadPoolExecutor(max_workers=10)
+        # TODO(flwang): Make the max_workers configurable
+        self.executor = futurist.ThreadPoolExecutor(max_workers=10)
 
     def post(self, queue_name, messages, client_uuid, project=None):
         """Send messages to the subscribers."""
-        if self.subscription_controller:
+        if (self.subscription_controller and
+            not isinstance(self.subscription_controller,
+                           pooling.SubscriptionController)):
             subscribers = self.subscription_controller.list(queue_name,
                                                             project)
 
             for sub in next(subscribers):
                 s_type = urllib_parse.urlparse(sub['subscriber']).scheme
-
+                data_driver = self.subscription_controller.driver
                 mgr = driver.DriverManager('zaqar.notification.tasks',
                                            s_type,
                                            invoke_on_load=True)
-                self.executor.submit(mgr.driver.execute, sub, messages)
+                self.executor.submit(mgr.driver.execute, sub, messages,
+                                     conf=data_driver.conf)
         else:
             LOG.error('Failed to get subscription controller.')

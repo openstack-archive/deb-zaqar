@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+import mock
 import uuid
 
 from zaqar.openstack.common.cache import cache as oslo_cache
@@ -49,9 +50,18 @@ class PoolCatalogTest(testing.TestBase):
         self.flavor = str(uuid.uuid1())
         self.project = str(uuid.uuid1())
 
-        self.pools_ctrl.create(self.pool, 100, 'mongodb://localhost:27017')
+        # FIXME(therve) This is horrible, we need to manage duplication in a
+        # nicer way
+        if 'localhost' in self.mongodb_url:
+            other_url = self.mongodb_url.replace('localhost', '127.0.0.1')
+        elif '127.0.0.1' in self.mongodb_url:
+            other_url = self.mongodb_url.replace('127.0.0.1', 'localhost')
+        else:
+            self.skipTest("Can't build a dummy mongo URL.")
+
+        self.pools_ctrl.create(self.pool, 100, self.mongodb_url)
         self.pools_ctrl.create(self.pool2, 100,
-                               'mongodb://127.0.0.1:27017',
+                               other_url,
                                group=self.pool_group)
         self.catalogue_ctrl.insert(self.project, self.queue, self.pool)
         self.catalog = pooling.Catalog(self.conf, cache, control)
@@ -96,3 +106,15 @@ class PoolCatalogTest(testing.TestBase):
                           self.catalog.register,
                           'test', project=self.project,
                           flavor='fake')
+
+    def test_queues_list_on_multi_pools(self):
+        def fake_list(project=None, marker=None, limit=10, detailed=False):
+            yield iter([{'name': 'fake_queue'}])
+
+        list_str = 'zaqar.storage.mongodb.queues.QueueController.list'
+        with mock.patch(list_str) as queues_list:
+            queues_list.side_effect = fake_list
+            queue_controller = pooling.QueueController(self.catalog)
+            result = queue_controller.list(project=self.project)
+            queue_list = list(next(result))
+            self.assertEqual(1, len(queue_list))

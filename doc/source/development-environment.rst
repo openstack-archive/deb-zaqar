@@ -11,6 +11,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
+====================================
 Setting up a development environment
 ====================================
 
@@ -108,7 +109,7 @@ Configuration
 
 4. Find the [drivers] section in ~/.zaqar/zaqar.conf and specify mongodb as the message store::
 
-    message_storage = mongodb
+    message_store = mongodb
     management_store = mongodb
 
 5. Find the [drivers:message_store:mongodb] section and modify the URI to point to your local mongod instance::
@@ -171,14 +172,14 @@ environment, you can add it to your DevStack_ deployment.
 To do this, you first need to add the following setting
 to your local.conf::
 
-    enable_service zaqar-server
+    enable_plugin zaqar https://github.com/openstack/zaqar
 
 Then run the stack.sh script as usual.
 
 After running the DevStack_ script, you can start the Zaqar server
 and test it by following steps 5 and 6 from the previous section.
 
-.. _DevStack: http://devstack.org
+.. _DevStack: http://docs.openstack.org/developer/devstack/
 
 Running unit tests
 ------------------

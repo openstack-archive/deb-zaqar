@@ -27,10 +27,11 @@ from zaqar.storage.redis import models
 from zaqar.storage.redis import utils
 
 
-SubscripitonEnvelope = models.SubscriptionEnvelope
+SubscriptionEnvelope = models.SubscriptionEnvelope
 
 SUBSET_INDEX_KEY = 'subset_index'
 SUBSCRIPTION_IDS_SUFFIX = 'subscriptions'
+SUBSCRIBERS_SUFFIX = 'subscribers'
 
 
 class SubscriptionController(base.Subscription):
@@ -64,7 +65,6 @@ class SubscriptionController(base.Subscription):
         subset_key = utils.scope_subscription_ids_set(queue,
                                                       project,
                                                       SUBSCRIPTION_IDS_SUFFIX)
-        marker = utils.scope_queue_name(marker, project)
         rank = client.zrank(subset_key, marker)
         start = rank + 1 if rank else 0
 
@@ -78,7 +78,7 @@ class SubscriptionController(base.Subscription):
                 'source': record[0],
                 'subscriber': record[1],
                 'ttl': record[2],
-                'options': record[3],
+                'options': self._unpacker(record[3]),
             }
             marker_next['next'] = sid
 
@@ -90,10 +90,8 @@ class SubscriptionController(base.Subscription):
     @utils.raises_conn_error
     @utils.retries_on_connection_error
     def get(self, queue, subscription_id, project=None):
-        if not self._queue_ctrl.exists(queue, project):
-            raise errors.QueueDoesNotExist(queue, project)
 
-        subscription = SubscripitonEnvelope.from_redis(subscription_id,
+        subscription = SubscriptionEnvelope.from_redis(subscription_id,
                                                        self._client)
         now = timeutils.utcnow_ts()
 
@@ -106,6 +104,10 @@ class SubscriptionController(base.Subscription):
     @utils.raises_conn_error
     @utils.retries_on_connection_error
     def create(self, queue, subscriber, ttl, options, project=None):
+        member_key = utils.scope_subscribers_set(queue, project,
+                                                 SUBSCRIBERS_SUFFIX)
+        if self._client.sismember(member_key, subscriber):
+            return None
         subscription_id = str(uuid.uuid4())
         subset_key = utils.scope_subscription_ids_set(queue,
                                                       project,
@@ -121,7 +123,7 @@ class SubscriptionController(base.Subscription):
                         'u': subscriber,
                         't': ttl,
                         'e': expires,
-                        'o': options,
+                        'o': self._packer(options),
                         'p': project}
 
         if not self._queue_ctrl.exists(queue, project):
@@ -129,9 +131,9 @@ class SubscriptionController(base.Subscription):
         try:
             # Pipeline ensures atomic inserts.
             with self._client.pipeline() as pipe:
+                pipe.sadd(member_key, subscriber)
                 pipe.zadd(subset_key, 1,
-                          subscription_id).hmset(subscription_id,
-                                                 subscription)
+                          subscription_id).hmset(subscription_id, subscription)
                 pipe.execute()
             return subscription_id
         except redis.exceptions.ResponseError:
@@ -166,8 +168,12 @@ class SubscriptionController(base.Subscription):
     def delete(self, queue, subscription_id, project=None):
         subset_key = utils.scope_subscription_ids_set(queue, project,
                                                       SUBSCRIPTION_IDS_SUFFIX)
+        member_key = utils.scope_subscribers_set(queue, project,
+                                                 SUBSCRIBERS_SUFFIX)
+        subscriber = self._client.hget(subscription_id, 'u')
         # NOTE(prashanthr_): Pipelining is used to mitigate race conditions
         with self._client.pipeline() as pipe:
+            pipe.srem(member_key, subscriber)
             pipe.zrem(subset_key, subscription_id)
             pipe.delete(subscription_id)
             pipe.execute()

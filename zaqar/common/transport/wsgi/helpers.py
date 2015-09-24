@@ -35,6 +35,7 @@ def verify_pre_signed_url(key, req, resp, params):
     project = headers.get('X-PROJECT-ID')
     expires = headers.get('URL-EXPIRES')
     methods = headers.get('URL-METHODS', '').split(',')
+    paths = headers.get('URL-PATHS', '').split(',')
     signature = headers.get('URL-SIGNATURE')
 
     if not signature:
@@ -43,8 +44,11 @@ def verify_pre_signed_url(key, req, resp, params):
     if req.method not in methods:
         raise falcon.HTTPNotFound()
 
+    if req.path not in paths:
+        raise falcon.HTTPNotFound()
+
     try:
-        verified = urls.verify_signed_headers_data(key, req.path,
+        verified = urls.verify_signed_headers_data(key, paths,
                                                    project=project,
                                                    methods=methods,
                                                    expires=expires,
@@ -196,7 +200,19 @@ def inject_context(req, resp, params):
     """
     client_id = req.get_header('Client-ID')
     project_id = params.get('project_id', None)
+    request_id = req.headers.get('X-Openstack-Request-ID'),
+    auth_token = req.headers.get('X-AUTH-TOKEN')
+    user = req.headers.get('X-USER-ID')
+    tenant = req.headers.get('X-TENANT-ID')
+
+    roles = req.headers.get('X-ROLES')
+    roles = roles and roles.split(',') or []
 
     ctxt = context.RequestContext(project_id=project_id,
-                                  client_id=client_id)
+                                  client_id=client_id,
+                                  request_id=request_id,
+                                  auth_token=auth_token,
+                                  user=user,
+                                  tenant=tenant,
+                                  roles=roles)
     req.env['zaqar.context'] = ctxt

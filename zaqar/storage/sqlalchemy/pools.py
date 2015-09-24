@@ -15,11 +15,6 @@
 """pools: an implementation of the pool management storage
 controller for sqlalchemy.
 
-Schema:
-  'n': name :: six.text_type
-  'u': uri :: six.text_type
-  'w': weight :: int
-  'o': options :: dict
 """
 
 import functools
@@ -35,11 +30,6 @@ from zaqar.storage.sqlalchemy import utils
 
 class PoolsController(base.PoolsBase):
 
-    def __init__(self, *args, **kwargs):
-        super(PoolsController, self).__init__(*args, **kwargs)
-
-        self._conn = self.driver.connection
-
     @utils.raises_conn_error
     def _list(self, marker=None, limit=10, detailed=False):
         marker = marker or ''
@@ -52,7 +42,7 @@ class PoolsController(base.PoolsBase):
         )
         if limit > 0:
             stmt = stmt.limit(limit)
-        cursor = self._conn.execute(stmt)
+        cursor = self.driver.connection.execute(stmt)
 
         marker_name = {}
 
@@ -69,7 +59,7 @@ class PoolsController(base.PoolsBase):
         stmt = sa.sql.select([tables.Pools]).where(
             tables.Pools.c.group == group
         )
-        cursor = self._conn.execute(stmt)
+        cursor = self.driver.connection.execute(stmt)
 
         normalizer = functools.partial(_normalize, detailed=detailed)
         return (normalizer(v) for v in cursor)
@@ -80,22 +70,33 @@ class PoolsController(base.PoolsBase):
             tables.Pools.c.name == name
         )
 
-        pool = self._conn.execute(stmt).fetchone()
+        pool = self.driver.connection.execute(stmt).fetchone()
         if pool is None:
             raise errors.PoolDoesNotExist(name)
 
         return _normalize(pool, detailed)
+
+    def _ensure_group_exists(self, name):
+        try:
+            stmt = sa.sql.expression.insert(tables.PoolGroup).values(name=name)
+            self.driver.connection.execute(stmt)
+            return True
+        except sa.exc.IntegrityError:
+            return False
 
     # TODO(cpp-cabrera): rename to upsert
     @utils.raises_conn_error
     def _create(self, name, weight, uri, group=None, options=None):
         opts = None if options is None else utils.json_encode(options)
 
+        if group is not None:
+            self._ensure_group_exists(group)
+
         try:
             stmt = sa.sql.expression.insert(tables.Pools).values(
                 name=name, weight=weight, uri=uri, group=group, options=opts
             )
-            self._conn.execute(stmt)
+            self.driver.connection.execute(stmt)
 
         except sa.exc.IntegrityError:
             # TODO(cpp-cabrera): merge update/create into a single
@@ -108,7 +109,7 @@ class PoolsController(base.PoolsBase):
         stmt = sa.sql.select([tables.Pools.c.name]).where(
             tables.Pools.c.name == name
         ).limit(1)
-        return self._conn.execute(stmt).fetchone() is not None
+        return self.driver.connection.execute(stmt).fetchone() is not None
 
     @utils.raises_conn_error
     def _update(self, name, **kwargs):
@@ -125,10 +126,13 @@ class PoolsController(base.PoolsBase):
         if 'options' in fields:
             fields['options'] = utils.json_encode(fields['options'])
 
+        if fields.get('group') is not None:
+            self._ensure_group_exists(fields.get('group'))
+
         stmt = sa.sql.update(tables.Pools).where(
             tables.Pools.c.name == name).values(**fields)
 
-        res = self._conn.execute(stmt)
+        res = self.driver.connection.execute(stmt)
         if res.rowcount == 0:
             raise errors.PoolDoesNotExist(name)
 
@@ -137,12 +141,14 @@ class PoolsController(base.PoolsBase):
         stmt = sa.sql.expression.delete(tables.Pools).where(
             tables.Pools.c.name == name
         )
-        self._conn.execute(stmt)
+        self.driver.connection.execute(stmt)
 
     @utils.raises_conn_error
     def _drop_all(self):
         stmt = sa.sql.expression.delete(tables.Pools)
-        self._conn.execute(stmt)
+        self.driver.connection.execute(stmt)
+        stmt = sa.sql.expression.delete(tables.PoolGroup)
+        self.driver.connection.execute(stmt)
 
 
 def _normalize(pool, detailed=False):

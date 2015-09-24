@@ -94,7 +94,7 @@ class TestFlavorsMongoDB(base.V2Base):
         self.pool_path = self.url_prefix + '/pools/' + self.pool
         self.pool_doc = {'weight': 100,
                          'group': self.pool_group,
-                         'uri': 'mongodb://localhost:27017/test'}
+                         'uri': self.mongodb_url + '/test'}
         self.simulate_put(self.pool_path, body=jsonutils.dumps(self.pool_doc))
 
         self.flavor = 'test-flavor'
@@ -158,8 +158,14 @@ class TestFlavorsMongoDB(base.V2Base):
         self.simulate_delete(self.pool_path)
         self.assertEqual(self.srmock.status, falcon.HTTP_204)
 
-        self.simulate_put(self.flavor_path, body=jsonutils.dumps(self.doc))
+        resp = self.simulate_put(self.flavor_path,
+                                 body=jsonutils.dumps(self.doc))
         self.assertEqual(self.srmock.status, falcon.HTTP_400)
+        self.assertEqual(
+            {'description': 'Flavor test-flavor could not be created. '
+                            'Pool mypool-group does not exist',
+             'title': 'Unable to create'},
+            jsonutils.loads(resp[0]))
 
     def test_delete_works(self):
         self.simulate_delete(self.flavor_path)
@@ -244,7 +250,7 @@ class TestFlavorsMongoDB(base.V2Base):
         # NOTE(cpp-cabrera): delete initial flavor - it will interfere
         # with listing tests
         self.simulate_delete(self.flavor_path)
-        query = '?limit={0}&detailed={1}'.format(limit, detailed)
+        query = 'limit={0}&detailed={1}'.format(limit, detailed)
         if marker:
             query += '&marker={2}'.format(marker)
 
@@ -260,12 +266,12 @@ class TestFlavorsMongoDB(base.V2Base):
 
             link = results['links'][0]
             self.assertEqual('next', link['rel'])
-            href = falcon.uri.parse_query_string(link['href'])
+            href = falcon.uri.parse_query_string(link['href'].split('?')[1])
             self.assertIn('marker', href)
             self.assertEqual(href['limit'], str(limit))
             self.assertEqual(href['detailed'], str(detailed).lower())
 
-            next_query_string = ('?marker={marker}&limit={limit}'
+            next_query_string = ('marker={marker}&limit={limit}'
                                  '&detailed={detailed}').format(**href)
             next_result = self.simulate_get(link['href'].split('?')[0],
                                             query_string=next_query_string)
@@ -308,7 +314,7 @@ class TestFlavorsMongoDB(base.V2Base):
 
         with flavors(self, 10, self.doc['pool']) as expected:
             result = self.simulate_get(self.url_prefix + '/flavors',
-                                       query_string='?marker=3')
+                                       query_string='marker=3')
             self.assertEqual(self.srmock.status, falcon.HTTP_200)
             flavor_list = jsonutils.loads(result[0])['flavors']
             self.assertEqual(len(flavor_list), 6)

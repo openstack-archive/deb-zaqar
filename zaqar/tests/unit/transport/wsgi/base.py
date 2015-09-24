@@ -46,6 +46,8 @@ class TestBase(testing.TestBase):
         self.conf.unreliable = True
         self.conf.admin_mode = True
         self.boot = bootstrap.Bootstrap(self.conf)
+        self.addCleanup(self.boot.storage.close)
+        self.addCleanup(self.boot.control.close)
 
         self.app = self.boot.transport.app
 
@@ -53,6 +55,9 @@ class TestBase(testing.TestBase):
 
         self.headers = {
             'Client-ID': str(uuid.uuid4()),
+            'X-ROLES': 'admin',
+            'X-USER-ID': 'a12d157c7d0d41999096639078fd11fc',
+            'X-TENANT-ID': 'abb69142168841fcaa2785791b92467f',
         }
 
     def tearDown(self):
