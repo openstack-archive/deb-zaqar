@@ -1,0 +1,449 @@
+Description: Fix usage of mongo test URL
+ ZAQAR_TEST_MONGODB_URL wasn't used everywhere in the tests, this patch
+ fixes that.
+Author: Thomas Herve <therve@redhat.com>
+Date: Tue, 15 Sep 2015 09:14:32 +0000 (+0200)
+X-Git-Url: https://review.openstack.org/gitweb?p=openstack%2Fzaqar.git;a=commitdiff_plain;h=254535ede46977a6e4dc7e8df923b4b44e243c9c
+Change-Id: I3cf111f13fc34747e04bd4ea630ef6cf0c1c0b34
+Origin: upstream, https://review.openstack.org/#/c/223553/
+Last-Update: 2015-09-15
+
+Index: zaqar/zaqar/tests/base.py
+===================================================================
+--- zaqar.orig/zaqar/tests/base.py
++++ zaqar/zaqar/tests/base.py
+@@ -23,6 +23,7 @@ import testtools
+ 
+ from zaqar.common import configs
+ from zaqar.tests import helpers
++from zaqar.transport import acl
+ 
+ 
+ class TestBase(testtools.TestCase):
+@@ -58,6 +59,9 @@ class TestBase(testtools.TestCase):
+         self.conf.register_opts(configs._DRIVER_OPTIONS,
+                                 group=configs._DRIVER_GROUP)
+ 
++        self.mongodb_url = os.environ.get('ZAQAR_TEST_MONGODB_URL',
++                                          'mongodb://127.0.0.1:27017')
++
+     @classmethod
+     def conf_path(cls, filename):
+         """Returns the full path to the specified Zaqar conf file.
+Index: zaqar/zaqar/tests/functional/wsgi/v1_1/test_pools.py
+===================================================================
+--- zaqar.orig/zaqar/tests/functional/wsgi/v1_1/test_pools.py
++++ zaqar/zaqar/tests/functional/wsgi/v1_1/test_pools.py
+@@ -43,15 +43,14 @@ class TestPools(base.V1_1FunctionalTestB
+     @ddt.data(
+         {
+             'name': "newpool",
+-            'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
++            'weight': 10
+         }
+     )
+     def test_insert_pool(self, params):
+         """Test the registering of one pool."""
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+ 
+         pool_name = params.get('name', "newpool")
+@@ -67,15 +66,14 @@ class TestPools(base.V1_1FunctionalTestB
+     @ddt.data(
+         {
+             'name': "newpool",
+-            'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
++            'weight': 10
+         }
+     )
+     def test_pool_details(self, params):
+         """Get the details of a pool. Assert the respective schema."""
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+ 
+         pool_name = params.get('name', "newpool")
+@@ -92,7 +90,6 @@ class TestPools(base.V1_1FunctionalTestB
+         {
+             'name': "newpool",
+             'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
+         }
+     )
+     def test_delete_pool(self, params):
+@@ -104,7 +101,7 @@ class TestPools(base.V1_1FunctionalTestB
+         # Create the pool
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+ 
+         pool_name = params.get('name', "newpool")
+@@ -123,7 +120,6 @@ class TestPools(base.V1_1FunctionalTestB
+         {
+             'name': "newpool",
+             'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
+         }
+     )
+     def test_list_pools(self, params):
+@@ -133,7 +129,7 @@ class TestPools(base.V1_1FunctionalTestB
+         """
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+         pool_name = params.get('name', "newpool")
+         self.addCleanup(self.client.delete, url='/'+pool_name)
+@@ -148,7 +144,6 @@ class TestPools(base.V1_1FunctionalTestB
+         {
+             'name': "newpool",
+             'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
+         }
+     )
+     def test_patch_pool(self, params):
+@@ -159,7 +154,7 @@ class TestPools(base.V1_1FunctionalTestB
+ 
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+         pool_name = params.get('name', "newpool")
+         self.addCleanup(self.client.delete, url='/'+pool_name)
+@@ -169,7 +164,7 @@ class TestPools(base.V1_1FunctionalTestB
+ 
+         patchdoc = helpers.create_pool_body(
+             weight=5,
+-            uri="mongodb://127.0.0.1:27017"
++            uri=self.mongodb_url
+         )
+         result = self.client.patch('/'+pool_name, data=patchdoc)
+         self.assertEqual(result.status_code, 200)
+@@ -183,7 +178,6 @@ class TestPools(base.V1_1FunctionalTestB
+         {
+             'name': "newpool",
+             'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
+         }
+     )
+     def test_patch_pool_bad_data(self, params):
+@@ -191,7 +185,7 @@ class TestPools(base.V1_1FunctionalTestB
+         # create a pool
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+         pool_name = params.get('name', "newpool")
+         self.addCleanup(self.client.delete, url='/'+pool_name)
+@@ -206,14 +200,13 @@ class TestPools(base.V1_1FunctionalTestB
+         {
+             'name': "newpool",
+             'weight': 10,
+-            'uri': "mongodb://127.0.0.1:27017"
+         }
+     )
+     def test_patch_pool_non_exist(self, params):
+         """Issue patch command to pool that doesn't exist. Assert 404."""
+         doc = helpers.create_pool_body(
+             weight=5,
+-            uri=params.get('uri', "mongodb://127.0.0.1:27018")
++            uri=self.mongodb_url
+         )
+         result = self.client.patch('/nonexistpool', data=doc)
+         self.assertEqual(result.status_code, 404)
+@@ -228,7 +221,7 @@ class TestPools(base.V1_1FunctionalTestB
+         self.skip("FIXME: https://bugs.launchpad.net/zaqar/+bug/1373486")
+         doc = helpers.create_pool_body(
+             weight=params.get('weight', 10),
+-            uri=params.get('uri', "mongodb://127.0.0.1:27017")
++            uri=self.mongodb_url
+         )
+         pool_name = params.get('name', "newpool")
+         self.addCleanup(self.client.delete, url='/'+pool_name)
+Index: zaqar/zaqar/tests/helpers.py
+===================================================================
+--- zaqar.orig/zaqar/tests/helpers.py
++++ zaqar/zaqar/tests/helpers.py
+@@ -270,6 +270,9 @@ def override_mongo_conf(conf_file, test)
+             if not parser.has_section(section):
+                 parser.add_section(section)
+             parser.set(section, 'uri', test_mongo_url)
++        if not parser.has_section('oslo_policy'):
++            parser.add_section('oslo_policy')
++        parser.set('oslo_policy', 'policy_file', test.conf_path('policy.json'))
+         fd, path = tempfile.mkstemp()
+         conf_fd = os.fdopen(fd, 'w')
+         try:
+Index: zaqar/zaqar/tests/unit/common/storage/test_utils.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/common/storage/test_utils.py
++++ zaqar/zaqar/tests/unit/common/storage/test_utils.py
+@@ -30,7 +30,7 @@ class TestUtils(testing.TestBase):
+     @testing.requires_mongodb
+     def test_can_connect_succeeds_if_good_uri_mongo(self):
+         self.config(unreliable=True)
+-        self.assertTrue(utils.can_connect('mongodb://localhost:27017',
++        self.assertTrue(utils.can_connect(self.mongodb_url,
+                                           conf=self.conf))
+ 
+     @testing.requires_redis
+Index: zaqar/zaqar/tests/unit/storage/base.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/storage/base.py
++++ zaqar/zaqar/tests/unit/storage/base.py
+@@ -66,7 +66,7 @@ class ControllerBaseTest(testing.TestBas
+                 args.append(self.control)
+             self.driver = self.driver_class(*args)
+         else:
+-            uri = "mongodb://localhost:27017"
++            uri = self.mongodb_url
+             for i in range(4):
+                 db_name = "zaqar_test_pools_" + str(i)
+ 
+Index: zaqar/zaqar/tests/unit/storage/test_impl_mongodb.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/storage/test_impl_mongodb.py
++++ zaqar/zaqar/tests/unit/storage/test_impl_mongodb.py
+@@ -533,14 +533,11 @@ class MongodbCatalogueTests(base.Catalog
+     driver_class = mongodb.ControlDriver
+     controller_class = controllers.CatalogueController
+     control_driver_class = mongodb.ControlDriver
++    config_file = 'wsgi_mongodb.conf'
+ 
+     def setUp(self):
+         super(MongodbCatalogueTests, self).setUp()
+-        self.load_conf('wsgi_mongodb.conf')
+-
+-    def tearDown(self):
+-        self.controller.drop_all()
+-        super(MongodbCatalogueTests, self).tearDown()
++        self.addCleanup(self.controller.drop_all)
+ 
+ 
+ @testing.requires_mongodb
+@@ -579,8 +576,8 @@ class MongodbFlavorsTest(base.FlavorsCon
+     driver_class = mongodb.ControlDriver
+     controller_class = controllers.FlavorsController
+     control_driver_class = mongodb.ControlDriver
++    config_file = 'wsgi_mongodb.conf'
+ 
+     def setUp(self):
+         super(MongodbFlavorsTest, self).setUp()
+-        self.load_conf('wsgi_mongodb.conf')
+         self.addCleanup(self.controller.drop_all)
+Index: zaqar/zaqar/tests/unit/storage/test_pool_catalog.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/storage/test_pool_catalog.py
++++ zaqar/zaqar/tests/unit/storage/test_pool_catalog.py
+@@ -49,9 +49,18 @@ class PoolCatalogTest(testing.TestBase):
+         self.flavor = str(uuid.uuid1())
+         self.project = str(uuid.uuid1())
+ 
+-        self.pools_ctrl.create(self.pool, 100, 'mongodb://localhost:27017')
++        # FIXME(therve) This is horrible, we need to manage duplication in a
++        # nicer way
++        if 'localhost' in self.mongodb_url:
++            other_url = self.mongodb_url.replace('localhost', '127.0.0.1')
++        elif '127.0.0.1' in self.mongodb_url:
++            other_url = self.mongodb_url.replace('127.0.0.1', 'localhost')
++        else:
++            self.skipTest("Can't build a dummy mongo URL.")
++
++        self.pools_ctrl.create(self.pool, 100, self.mongodb_url)
+         self.pools_ctrl.create(self.pool2, 100,
+-                               'mongodb://127.0.0.1:27017',
++                               other_url,
+                                group=self.pool_group)
+         self.catalogue_ctrl.insert(self.project, self.queue, self.pool)
+         self.catalog = pooling.Catalog(self.conf, cache, control)
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v1/test_messages.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v1/test_messages.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v1/test_messages.py
+@@ -39,7 +39,7 @@ class TestMessagesMongoDB(base.V1Base):
+         super(TestMessagesMongoDB, self).setUp()
+         if self.conf.pooling:
+             for i in range(4):
+-                uri = "%s/%s" % ('mongodb://localhost:27017', str(i))
++                uri = "%s/%s" % (self.mongodb_url, str(i))
+                 doc = {'weight': 100, 'uri': uri}
+                 self.simulate_put(self.url_prefix + '/pools/' + str(i),
+                                   body=jsonutils.dumps(doc))
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v1/test_pools.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v1/test_pools.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v1/test_pools.py
+@@ -87,7 +87,7 @@ class TestPoolsMongoDB(base.V1Base):
+     @testing.requires_mongodb
+     def setUp(self):
+         super(TestPoolsMongoDB, self).setUp()
+-        self.doc = {'weight': 100, 'uri': 'mongodb://localhost:27017'}
++        self.doc = {'weight': 100, 'uri': self.mongodb_url}
+         self.pool = self.url_prefix + '/pools/' + str(uuid.uuid1())
+         self.simulate_put(self.pool, body=jsonutils.dumps(self.doc))
+         self.assertEqual(self.srmock.status, falcon.HTTP_201)
+@@ -110,7 +110,7 @@ class TestPoolsMongoDB(base.V1Base):
+ 
+         self.simulate_put(path,
+                           body=jsonutils.dumps(
+-                              {'uri': 'mongodb://localhost:27017'}))
++                              {'uri': self.mongodb_url}))
+         self.assertEqual(self.srmock.status, falcon.HTTP_400)
+ 
+     @ddt.data(-1, 2**32+1, 'big')
+@@ -208,13 +208,13 @@ class TestPoolsMongoDB(base.V1Base):
+ 
+     def test_patch_works(self):
+         doc = {'weight': 101,
+-               'uri': 'mongodb://localhost:27017',
++               'uri': self.mongodb_url,
+                'options': {'a': 1}}
+         self._patch_test(doc)
+ 
+     def test_patch_works_with_extra_fields(self):
+         doc = {'weight': 101,
+-               'uri': 'mongodb://localhost:27017',
++               'uri': self.mongodb_url,
+                'options': {'a': 1},
+                'location': 100, 'partition': 'taco'}
+         self._patch_test(doc)
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v1_1/test_flavors.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v1_1/test_flavors.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v1_1/test_flavors.py
+@@ -95,7 +95,7 @@ class TestFlavorsMongoDB(base.V1_1Base):
+         self.pool_path = self.url_prefix + '/pools/' + self.pool
+         self.pool_doc = {'weight': 100,
+                          'group': self.pool_group,
+-                         'uri': 'mongodb://localhost:27017'}
++                         'uri': self.mongodb_url}
+         self.simulate_put(self.pool_path, body=jsonutils.dumps(self.pool_doc))
+ 
+         self.flavor = 'test-flavor'
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v1_1/test_messages.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v1_1/test_messages.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v1_1/test_messages.py
+@@ -42,7 +42,7 @@ class TestMessagesMongoDB(base.V1_1Base)
+ 
+         if self.conf.pooling:
+             for i in range(4):
+-                uri = "%s/%s" % ('mongodb://localhost:27017', str(i))
++                uri = "%s/%s" % (self.mongodb_url, str(i))
+                 doc = {'weight': 100, 'uri': uri}
+                 self.simulate_put(self.url_prefix + '/pools/' + str(i),
+                                   body=jsonutils.dumps(doc))
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v1_1/test_pools.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v1_1/test_pools.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v1_1/test_pools.py
+@@ -92,7 +92,7 @@ class TestPoolsMongoDB(base.V1_1Base):
+         super(TestPoolsMongoDB, self).setUp()
+         self.doc = {'weight': 100,
+                     'group': 'mygroup',
+-                    'uri': 'mongodb://localhost:27017'}
++                    'uri': self.mongodb_url}
+         self.pool = self.url_prefix + '/pools/' + str(uuid.uuid1())
+         self.simulate_put(self.pool, body=jsonutils.dumps(self.doc))
+         self.assertEqual(self.srmock.status, falcon.HTTP_201)
+@@ -115,7 +115,7 @@ class TestPoolsMongoDB(base.V1_1Base):
+ 
+         self.simulate_put(path,
+                           body=jsonutils.dumps(
+-                              {'uri': 'mongodb://localhost:27017'}))
++                              {'uri': self.mongodb_url}))
+         self.assertEqual(self.srmock.status, falcon.HTTP_400)
+ 
+     @ddt.data(-1, 2**32+1, 'big')
+@@ -213,13 +213,13 @@ class TestPoolsMongoDB(base.V1_1Base):
+ 
+     def test_patch_works(self):
+         doc = {'weight': 101,
+-               'uri': 'mongodb://localhost:27017',
++               'uri': self.mongodb_url,
+                'options': {'a': 1}}
+         self._patch_test(doc)
+ 
+     def test_patch_works_with_extra_fields(self):
+         doc = {'weight': 101,
+-               'uri': 'mongodb://localhost:27017',
++               'uri': self.mongodb_url,
+                'options': {'a': 1},
+                'location': 100, 'partition': 'taco'}
+         self._patch_test(doc)
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v2_0/test_flavors.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v2_0/test_flavors.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v2_0/test_flavors.py
+@@ -94,7 +94,7 @@ class TestFlavorsMongoDB(base.V2Base):
+         self.pool_path = self.url_prefix + '/pools/' + self.pool
+         self.pool_doc = {'weight': 100,
+                          'group': self.pool_group,
+-                         'uri': 'mongodb://localhost:27017/test'}
++                         'uri': self.mongodb_url + '/test'}
+         self.simulate_put(self.pool_path, body=jsonutils.dumps(self.pool_doc))
+ 
+         self.flavor = 'test-flavor'
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v2_0/test_messages.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v2_0/test_messages.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v2_0/test_messages.py
+@@ -40,7 +40,7 @@ class TestMessagesMongoDB(base.V2Base):
+         self.default_message_ttl = self.boot.transport._defaults.message_ttl
+ 
+         if self.conf.pooling:
+-            uri = "mongodb://localhost:27017"
++            uri = self.mongodb_url
+             for i in range(4):
+                 db_name = "zaqar_test_pools_" + str(i)
+                 # NOTE(dynarro): we need to create a unique uri.
+Index: zaqar/zaqar/tests/unit/transport/wsgi/v2_0/test_pools.py
+===================================================================
+--- zaqar.orig/zaqar/tests/unit/transport/wsgi/v2_0/test_pools.py
++++ zaqar/zaqar/tests/unit/transport/wsgi/v2_0/test_pools.py
+@@ -91,7 +91,7 @@ class TestPoolsMongoDB(base.V2Base):
+         super(TestPoolsMongoDB, self).setUp()
+         self.doc = {'weight': 100,
+                     'group': 'mygroup',
+-                    'uri': 'mongodb://127.0.0.1:27017'}
++                    'uri': self.mongodb_url}
+         self.pool = self.url_prefix + '/pools/' + str(uuid.uuid1())
+         self.simulate_put(self.pool, body=jsonutils.dumps(self.doc))
+         self.assertEqual(self.srmock.status, falcon.HTTP_201)
+@@ -114,7 +114,7 @@ class TestPoolsMongoDB(base.V2Base):
+ 
+         self.simulate_put(path,
+                           body=jsonutils.dumps(
+-                              {'uri': 'mongodb://127.0.0.1:27017'}))
++                              {'uri': self.mongodb_url}))
+         self.assertEqual(self.srmock.status, falcon.HTTP_400)
+ 
+     @ddt.data(-1, 2**32+1, 'big')
+@@ -212,13 +212,13 @@ class TestPoolsMongoDB(base.V2Base):
+ 
+     def test_patch_works(self):
+         doc = {'weight': 101,
+-               'uri': 'mongodb://localhost:27017',
++               'uri': self.mongodb_url,
+                'options': {'a': 1}}
+         self._patch_test(doc)
+ 
+     def test_patch_works_with_extra_fields(self):
+         doc = {'weight': 101,
+-               'uri': 'mongodb://localhost:27017',
++               'uri': self.mongodb_url,
+                'options': {'a': 1},
+                'location': 100,
+                'partition': 'taco'}

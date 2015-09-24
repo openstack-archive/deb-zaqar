@@ -1,8 +1,7 @@
 #!/usr/bin/make -f
 
 include /usr/share/openstack-pkg-tools/pkgos.make
-
-export OSLO_PACKAGE_VERSION=$(VERSION)
+export OSLO_PACKAGE_VERSION=$(shell dpkg-parsechangelog | grep Version: | cut -d' ' -f2 | sed -e 's/^[[:digit:]]*://' -e 's/[-].*//' -e 's/~/.0/' | head -n 1)
 
 %:
 	dh $@ --buildsystem=python_distutils --with python2,systemd
@@ -16,7 +15,7 @@ ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 		rm -rf .testrepository ; \
 		testr-python$$PYMAJOR init ; \
 		TEMP_REZ=`mktemp -t` ; \
-		PYTHONPATH=$(CURDIR) PYTHON=python$$i bash -x ./debian/setup-test-env-mongodb.sh testr-python$$PYMAJOR run --subunit | tee $$TEMP_REZ | subunit2pyunit ; \
+		bash -x ./debian/setup-test-env-mongodb.sh testr-python$$PYMAJOR run --subunit | tee $$TEMP_REZ | subunit2pyunit ; \
 		cat $$TEMP_REZ | subunit-filter -s --no-passthrough | subunit-stats ; \
 		rm -f $$TEMP_REZ ; \
 		testr-python$$PYMAJOR slowest ; \
@@ -25,16 +24,24 @@ endif
 
 override_dh_auto_build:
 	dh_auto_build -O--buildsystem=python_distutils
+	/usr/share/openstack-pkg-tools/pkgos_insert_include pkgos_func zaqar-common.config
 	/usr/share/openstack-pkg-tools/pkgos_insert_include pkgos_func zaqar-common.postinst
+	/usr/share/openstack-pkg-tools/pkgos_insert_include pkgos_func zaqar-server.config
+	/usr/share/openstack-pkg-tools/pkgos_insert_include pkgos_func zaqar-server.postinst
 
 override_dh_clean:
-	dh_clean
-	rm -rf build debian/zaqar-common.postinst debian/*.service debian/*.init debian/*.upstart
+	dh_clean -O--buildsystem=python_distutils
+	rm -rf build \
+		debian/zaqar-common.postinst \
+		debian/zaqar-common.config \
+		debian/zaqar-server.postinst \
+		debian/zaqar-server.config \
+		debian/*.service debian/*.init debian/*.upstart
 
 override_dh_install:
 	dh_install --fail-missing
-	mkdir $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common
-	oslo-config-generator --output-file $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common/zaqar.conf \
+	mkdir -p $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common
+	PYTHONPATH=. oslo-config-generator --output-file $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common/zaqar.conf \
 		--namespace zaqar.bootstrap \
 		--namespace zaqar.storage.pipeline \
 		--namespace zaqar.storage.pooling \
@@ -44,7 +51,10 @@ override_dh_install:
 		--namespace zaqar.transport.wsgi \
 		--namespace zaqar.transport.base \
 		--namespace zaqar.transport.validation \
-		--namespace keystoneclient.middleware.auth_token
+		--namespace keystoneclient.middleware.auth_token \
+		--namespace keystonemiddleware.auth_token
 
-override_dh_auto_build:
-	dh_auto_build
+	for i in policy.json zaqar-benchmark.conf logging.conf ; do \
+		cp etc/$$i.sample $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common/$$i ; \
+	done
+	cp etc/zaqar-benchmark-messages.json $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common

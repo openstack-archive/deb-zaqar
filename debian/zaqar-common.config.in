@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+#PKGOS-INCLUDE#
+
+#db_input high zaqar/configure_db || true
+#db_go || true
+pkgos_read_admin_creds /etc/zaqar/zaqar.conf keystone_authtoken zaqar
+
+exit 0
