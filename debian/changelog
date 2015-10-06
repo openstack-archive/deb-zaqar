@@ -1,6 +1,7 @@
 zaqar (1.0.0-1) unstable; urgency=medium
 
   * New upstream release.
+  * Removed patches applied upstream.
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 24 Sep 2015 18:25:29 +0200
 
