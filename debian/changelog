@@ -1,3 +1,9 @@
+zaqar (1.0.0-3) unstable; urgency=medium
+
+  * Rebuilt with openstack-pkg-tools 37 to use Keystone API v3.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 03 Nov 2015 09:15:44 +0000
+
 zaqar (1.0.0-2) unstable; urgency=medium
 
   * Correctly rm remainings on purge (Closes: #802531).
