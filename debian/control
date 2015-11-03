@@ -147,6 +147,7 @@ Depends: adduser,
          zaqar-common (= ${binary:Version}),
          debconf,
          python-keystoneclient,
+         q-text-as-data,
          ${misc:Depends},
          ${ostack-lsb-base},
          ${python:Depends}
