@@ -1,0 +1,276 @@
+# Italian translation of zaqar debconf messages
+# Copyright (C) 2014, zaqar package's copyright holder
+# This file is distributed under the same license as the zaqar package.
+# Beatrice Torracca <beatricet@libero.it>, 2013, 2014.
+msgid ""
+msgstr ""
+"Project-Id-Version: zaqar\n"
+"Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
+"POT-Creation-Date: 2015-09-17 09:04+0000\n"
+"PO-Revision-Date: 2014-04-06 15:15+0200\n"
+"Last-Translator: Beatrice Torracca <beatricet@libero.it>\n"
+"Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+
+#. Type: boolean
+#. Description
+#: ../zaqar-server.templates:2001
+msgid "Register Zaqar in the Keystone endpoint catalog?"
+msgstr "Registrare Zaqar nel catalogo di punti terminali keystone?"
+
+#. Type: boolean
+#. Description
+#: ../zaqar-server.templates:2001
+msgid ""
+"Each OpenStack service (each API) should be registered in order to be "
+"accessible. This is done using \"keystone service-create\" and \"keystone "
+"endpoint-create\". This can be done automatically now."
+msgstr ""
+"Ogni servizio OpenStack (ogni API) dovrebbe essere registrato per poter "
+"essere accessibile. Ciò viene fatto usando «keystone service-create» e "
+"«keystone endpoint-create». Scegliere se si desidera eseguire ora questi "
+"comandi."
+
+#. Type: boolean
+#. Description
+#: ../zaqar-server.templates:2001
+msgid ""
+"Note that you will need to have an up and running Keystone server on which "
+"to connect using the Keystone authentication token."
+msgstr ""
+"Notare che sarà necessario avere un server keystone in funzione a cui "
+"connettersi usando il token di autorizzazione Keystone."
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:3001
+msgid "Keystone server IP address:"
+msgstr "Indirizzo IP di Keystone:"
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:3001
+msgid ""
+"Please enter the IP address of the Keystone server, so that zaqar-server can "
+"contact Keystone to do the Zaqar service and endpoint creation."
+msgstr ""
+"Inserire l'indirizzo IP del proprio server keystone, in modo che zaqar-server "
+"possa contattare Keystone per effettuare la creazione del servizio e del "
+"punto terminale Zaqar."
+
+#. Type: password
+#. Description
+#: ../zaqar-server.templates:4001
+msgid "Keystone authentication token:"
+msgstr "Token di autenticazione Keystone:"
+
+#. Type: password
+#. Description
+#: ../zaqar-server.templates:4001
+msgid ""
+"To configure its endpoint in Keystone, zaqar-server needs the Keystone "
+"authentication token."
+msgstr ""
+"Per configurare il proprio punto terminale in Keystone, zaqar-server ha bisogno "
+"del token di autenticazione Keystone."
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:5001
+msgid "Zaqar endpoint IP address:"
+msgstr "Indirizzo IP del punto terminale Zaqar:"
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:5001
+msgid "Please enter the IP address that will be used to contact Zaqar."
+msgstr ""
+"Inserire l'indirizzo IP che verrà usato per contattare Zaqar (es.: "
+"l'indirizzo IP del punto terminale Zaqar)."
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:5001
+msgid ""
+"This IP address should be accessible from the clients that will use this "
+"service, so if you are installing a public cloud, this should be a public IP "
+"address."
+msgstr ""
+"Questo indirizzo IP dovrebbe essere accessibile dai client che useranno il "
+"servizio, perciò se si sta installando una cloud pubblica, questo dovrebbe "
+"essere un indirizzo IP pubblico."
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:6001
+msgid "Name of the region to register:"
+msgstr "Nome della regione da registrare:"
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:6001
+msgid ""
+"OpenStack supports using availability zones, with each region representing a "
+"location. Please enter the zone that you wish to use when registering the "
+"endpoint."
+msgstr ""
+"OpenStack può essere usato utilizzando le zone di disponibilità, con ogni "
+"regione che rappresenta una posizione. Inserire la zona che si desidera "
+"usare durante la registrazione del punto terminale."
+
+#. Type: string
+#. Description
+#: ../zaqar-common.templates:2001
+msgid "Authentication server hostname:"
+msgstr "Nome host del server di autenticazione:"
+
+#. Type: string
+#. Description
+#: ../zaqar-common.templates:2001
+msgid ""
+"Please specify the hostname of the authentication server for Zaqar. "
+"Typically this is also the hostname of the OpenStack Identity Service "
+"(Keystone)."
+msgstr ""
+"Specificare l'URL del server di autenticazione Zaqar. Tipicamente, è anche "
+"l'URL dell'OpenStack Identity Service (Keystone)."
+
+#. Type: string
+#. Description
+#. Translators: a "tenant" in OpenStack world is
+#. an entity that contains one or more username/password couples.
+#. It's typically the tenant that will be used for billing. Having more than one
+#. username/password is very helpful in larger organization.
+#. You're advised to either keep "tenant" without translating it
+#. or keep it parenthezised. Example for French:
+#. locataire ("tenant")
+#: ../zaqar-common.templates:3001
+msgid "Authentication server tenant name:"
+msgstr "Nome del locatario («tenant») per il server di autenticazione:"
+
+#. Type: string
+#. Description
+#. Translators: a "tenant" in OpenStack world is
+#. an entity that contains one or more username/password couples.
+#. It's typically the tenant that will be used for billing. Having more than one
+#. username/password is very helpful in larger organization.
+#. You're advised to either keep "tenant" without translating it
+#. or keep it parenthezised. Example for French:
+#. locataire ("tenant")
+#: ../zaqar-common.templates:3001
+msgid "Please specify the authentication server tenant name."
+msgstr ""
+"Specificare il nome del locatario («tenant») per il server di autenticazione."
+
+#. Type: string
+#. Description
+#: ../zaqar-common.templates:4001
+msgid "Authentication server username:"
+msgstr "Nome utente per il server di autenticazione:"
+
+#. Type: string
+#. Description
+#: ../zaqar-common.templates:4001
+msgid "Please specify the username to use with the authentication server."
+msgstr "Inserire il nome utente da usare con il server di autenticazione."
+
+#. Type: password
+#. Description
+#: ../zaqar-common.templates:5001
+msgid "Authentication server password:"
+msgstr "Password per il server di autenticazione:"
+
+#. Type: password
+#. Description
+#: ../zaqar-common.templates:5001
+msgid "Please specify the password to use with the authentication server."
+msgstr "Inserire la password da usare con il server di autenticazione."
+
+#~ msgid "Set up a database for Zaqar?"
+#~ msgstr "Impostare un database per Zaqar?"
+
+#~ msgid ""
+#~ "No database has been set up for Zaqar to use. Before continuing, you "
+#~ "should make sure you have the following information:"
+#~ msgstr ""
+#~ "Non è stato impostato alcun database per l'uso da parte di Zaqar. Se si "
+#~ "desidera impostarne uno ora assicurarsi di avere tutte le informazioni "
+#~ "necessarie:"
+
+#~ msgid ""
+#~ " * the type of database that you want to use;\n"
+#~ " * the database server hostname (that server must allow TCP connections "
+#~ "from this\n"
+#~ "   machine);\n"
+#~ " * a username and password to access the database."
+#~ msgstr ""
+#~ " * il tipo di database che si desidera usare;\n"
+#~ " * il nome host del server di database (che deve permettere le "
+#~ "connessioni\n"
+#~ "   TCP da questa macchina);\n"
+#~ " * un nome utente e una password per accedere al database."
+
+#~ msgid ""
+#~ "If some of these requirements are missing, do not choose this option and "
+#~ "run with regular SQLite support."
+#~ msgstr ""
+#~ "Se non si ha uno o più di questi requisiti, non scegliere questa opzione "
+#~ "ed eseguire con il regolare supporto per SQLite."
+
+#~ msgid ""
+#~ "You can change this setting later on by running \"dpkg-reconfigure -plow "
+#~ "zaqar\"."
+#~ msgstr ""
+#~ "È possibile cambiare questa impostazione successivamente eseguendo «dpkg-"
+#~ "reconfigure -plow zaqar»."
+
+#~ msgid "Zaqar volume group:"
+#~ msgstr "Gruppo di volumi Zaqar:"
+
+#~ msgid ""
+#~ "Please specify the name of the LVM volume group on which Zaqar will "
+#~ "create partitions."
+#~ msgstr ""
+#~ "Specificare il nome del gruppo di volumi (vg) LVM su cui Zaqar creerà le "
+#~ "partizioni."
+
+#~ msgid "IP address of your RabbitMQ host:"
+#~ msgstr "Indirizzo IP dell'host RabbitMQ:"
+
+#~ msgid ""
+#~ "In order to interoperate with other components of OpenStack, this package "
+#~ "needs to connect to a central RabbitMQ server."
+#~ msgstr ""
+#~ "Per poter funzionare insieme agli altri componenti di OpenStack, questo "
+#~ "pacchetto deve connettersi al server RabbitMQ centrale."
+
+#~| msgid "Please enter the IP address that will be used to contact Zaqar."
+#~ msgid "Please specify the IP address of that server."
+#~ msgstr "Inserire l'indirizzo IP di tale server."
+
+#~ msgid "Username for connection to the RabbitMQ server:"
+#~ msgstr "Nome utente per la connessione al server RabbitMQ:"
+
+#~ msgid "Please specify the username used to connect to the RabbitMQ server."
+#~ msgstr ""
+#~ "Specificare il nome utente da usare per connettersi al server RabbitMQ."
+
+#~ msgid "Password for connection to the RabbitMQ server:"
+#~ msgstr "Password per la connessione al server RabbitMQ:"
+
+#~ msgid "Please specify the password used to connect to the RabbitMQ server."
+#~ msgstr ""
+#~ "Specificare la password da usare per connettersi al server RabbitMQ."
+
+#~ msgid "Start Zaqar services at boot?"
+#~ msgstr "Far partire i servizi zaqar all'avvio?"
+
+#~ msgid ""
+#~ "Please choose whether you want to start Zaqar services when the machine "
+#~ "is booted up."
+#~ msgstr "Scegliere se far partire i servizi Zaqar all'avvio della macchina."

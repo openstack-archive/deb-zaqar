@@ -1,27 +1,47 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# zaqar po-debconf translation to Spanish
+# Copyright (C) 2013 Software in the Public Interest
+# This file is distributed under the same license as the zaqar package.
 #
-#, fuzzy
+# Changes:
+#   - Initial translation
+#       Matías A. Bellone <matiasbellone+debian@gmail.com>, 2013
+#
+# Traductores, si no conocen el formato PO, merece la pena leer la
+# documentación de gettext, especialmente las secciones dedicadas a este
+# formato, por ejemplo ejecutando:
+#       info -n '(gettext)PO Files'
+#       info -n '(gettext)Header Entry'
+#
+# Equipo de traducción al español, por favor lean antes de traducir
+# los siguientes documentos:
+#
+#   - El proyecto de traducción de Debian al español
+#     http://www.debian.org/intl/spanish/coordinacion
+#     especialmente las notas de traducción en
+#     http://www.debian.org/intl/spanish/notas
+#
+#   - La guía de traducción de po's de debconf:
+#     /usr/share/doc/po-debconf/README-trans
+#     o http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: zaqar\n"
 "Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-13 09:27+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2015-09-17 09:04+0000\n"
+"PO-Revision-Date: 2013-12-08 21:31-0300\n"
+"Last-Translator: Matías Bellone <matiasbellone+debian@gmail.com>\n"
+"Language-Team: Debian l10n Spanish <debian-l10n-spanish@lists.debian.org>\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
 msgid "Register Zaqar in the Keystone endpoint catalog?"
-msgstr ""
+msgstr "¿Desea registrar Zaqar en el catálogo de puntos finales de Keystone?"
 
 #. Type: boolean
 #. Description
@@ -31,6 +51,9 @@ msgid ""
 "accessible. This is done using \"keystone service-create\" and \"keystone "
 "endpoint-create\". This can be done automatically now."
 msgstr ""
+"Debe registrar cada uno de los servicios OpenStack (cada API) para que sean "
+"accesibles. Esto se lleva a cabo mediante las órdenes «keystone service-"
+"create» y «keystone endpoint-create». Puede hacerlo ahora automáticamente."
 
 #. Type: boolean
 #. Description
@@ -39,12 +62,14 @@ msgid ""
 "Note that you will need to have an up and running Keystone server on which "
 "to connect using the Keystone authentication token."
 msgstr ""
+"Tenga en cuenta que necesitará disponer de un servidor Keystone en ejecución "
+"al que conectarse utilizando el token de autenticación de Keystone."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:3001
 msgid "Keystone server IP address:"
-msgstr ""
+msgstr "Dirección IP del servidor Keystone:"
 
 #. Type: string
 #. Description
@@ -53,12 +78,15 @@ msgid ""
 "Please enter the IP address of the Keystone server, so that zaqar-server can "
 "contact Keystone to do the Zaqar service and endpoint creation."
 msgstr ""
+"Introduzca la dirección IP del servidor Keystone para que zaqar-server pueda "
+"contactar con Keystone para realizar el servicio Zaqar y crear el punto "
+"final."
 
 #. Type: password
 #. Description
 #: ../zaqar-server.templates:4001
 msgid "Keystone authentication token:"
-msgstr ""
+msgstr "Token de autenticación de Keystone:"
 
 #. Type: password
 #. Description
@@ -67,18 +95,20 @@ msgid ""
 "To configure its endpoint in Keystone, zaqar-server needs the Keystone "
 "authentication token."
 msgstr ""
+"Para configurar su punto final en Keystone, zaqar-server necesita el token de "
+"autenticación de Keystone."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
 msgid "Zaqar endpoint IP address:"
-msgstr ""
+msgstr "Dirección IP del punto final de Zaqar:"
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
 msgid "Please enter the IP address that will be used to contact Zaqar."
-msgstr ""
+msgstr "Introduzca la dirección IP que se utilizará para contactar con Zaqar."
 
 #. Type: string
 #. Description
@@ -88,12 +118,15 @@ msgid ""
 "service, so if you are installing a public cloud, this should be a public IP "
 "address."
 msgstr ""
+"Esta dirección IP debe ser accesible desde los clientes que usarán este "
+"servicio, por lo que si está instalando una nube pública, debería ser una "
+"dirección IP pública."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:6001
 msgid "Name of the region to register:"
-msgstr ""
+msgstr "Nombre de la región a registrar:"
 
 #. Type: string
 #. Description
@@ -103,12 +136,15 @@ msgid ""
 "location. Please enter the zone that you wish to use when registering the "
 "endpoint."
 msgstr ""
+"OpenStack puede utilizarse con zonas de disponibilidad, donde cada región "
+"representa una ubicación. Introduzca la zona que desea utilizar cuando "
+"registre el punto final."
 
 #. Type: string
 #. Description
 #: ../zaqar-common.templates:2001
 msgid "Authentication server hostname:"
-msgstr ""
+msgstr "Nombre del equipo del servidor de autenticación:"
 
 #. Type: string
 #. Description
@@ -118,6 +154,8 @@ msgid ""
 "Typically this is also the hostname of the OpenStack Identity Service "
 "(Keystone)."
 msgstr ""
+"Indique el nombre del equipo del servidor de autenticación. Suele ser el "
+"nombre del equipo del Servicio de Identidad de OpenStack (Keystone)."
 
 #. Type: string
 #. Description
@@ -130,7 +168,7 @@ msgstr ""
 #. locataire ("tenant")
 #: ../zaqar-common.templates:3001
 msgid "Authentication server tenant name:"
-msgstr ""
+msgstr "Nombre del inquilino («tenant») del servidor de autenticación:"
 
 #. Type: string
 #. Description
@@ -144,27 +182,29 @@ msgstr ""
 #: ../zaqar-common.templates:3001
 msgid "Please specify the authentication server tenant name."
 msgstr ""
+"Indique el nombre del inquilino («tenant») del servidor de autenticación."
 
 #. Type: string
 #. Description
 #: ../zaqar-common.templates:4001
 msgid "Authentication server username:"
-msgstr ""
+msgstr "Nombre de usuario del servidor de autenticación:"
 
 #. Type: string
 #. Description
 #: ../zaqar-common.templates:4001
 msgid "Please specify the username to use with the authentication server."
 msgstr ""
+"Indique el nombre de usuario para usar con el servidor de autenticación."
 
 #. Type: password
 #. Description
 #: ../zaqar-common.templates:5001
 msgid "Authentication server password:"
-msgstr ""
+msgstr "Contraseña del servidor de autenticación:"
 
 #. Type: password
 #. Description
 #: ../zaqar-common.templates:5001
 msgid "Please specify the password to use with the authentication server."
-msgstr ""
+msgstr "Indique la contraseña para usar con el servidor de autenticación."

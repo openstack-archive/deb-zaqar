@@ -10,7 +10,7 @@
 Template: zaqar/register-endpoint
 Type: boolean
 Default: false
-_Description: Register Aodh in the Keystone endpoint catalog?
+_Description: Register Zaqar in the Keystone endpoint catalog?
  Each OpenStack service (each API) should be registered in order to be
  accessible. This is done using "keystone service-create" and "keystone
  endpoint-create". This can be done automatically now.
@@ -22,7 +22,7 @@ Template: zaqar/keystone-ip
 Type: string
 _Description: Keystone server IP address:
  Please enter the IP address of the Keystone server, so that zaqar-server can
- contact Keystone to do the Aodh service and endpoint creation.
+ contact Keystone to do the Zaqar service and endpoint creation.
 
 Template: zaqar/keystone-auth-token
 Type: password
@@ -32,8 +32,8 @@ _Description: Keystone authentication token:
 
 Template: zaqar/endpoint-ip
 Type: string
-_Description: Aodh endpoint IP address:
- Please enter the IP address that will be used to contact Aodh.
+_Description: Zaqar endpoint IP address:
+ Please enter the IP address that will be used to contact Zaqar.
  .
  This IP address should be accessible from the clients that will use this
  service, so if you are installing a public cloud, this should be a public

@@ -1,3 +1,10 @@
+zaqar (1.0.0-5) unstable; urgency=medium
+
+  * Imported .po files from Cinder, ran debconf-poupdate, replaced cinder by
+    zaqar and unfuzzied strings (Closes: #801920).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 13 Nov 2015 09:38:53 +0100
+
 zaqar (1.0.0-4) unstable; urgency=medium
 
   * Added q-text-as-data in depends of zaqar-server.
