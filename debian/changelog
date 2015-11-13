@@ -2,6 +2,7 @@ zaqar (1.0.0-5) unstable; urgency=medium
 
   * Imported .po files from Cinder, ran debconf-poupdate, replaced cinder by
     zaqar and unfuzzied strings (Closes: #801920).
+  * Added pt.po debconf translation (Closes: #802425).
 
  -- Thomas Goirand <zigo@debian.org>  Fri, 13 Nov 2015 09:38:53 +0100
 
