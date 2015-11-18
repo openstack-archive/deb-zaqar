@@ -5,10 +5,10 @@
 # Américo Monteiro <a_monteiro@gmx.com>, 2015.
 msgid ""
 msgstr ""
-"Project-Id-Version: zaqar 1.0.0-1\n"
+"Project-Id-Version: zaqar 1.0.0-5\n"
 "Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-17 09:04+0000\n"
-"PO-Revision-Date: 2015-10-20 00:37+0100\n"
+"POT-Creation-Date: 2015-11-13 09:27+0100\n"
+"PO-Revision-Date: 2015-11-18 01:09+0000\n"
 "Last-Translator: Américo Monteiro <a_monteiro@gmx.com>\n"
 "Language-Team: Portuguese <traduz@debianpt.org>\n"
 "Language: pt\n"
@@ -21,8 +21,9 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
-msgid "Register Aodh in the Keystone endpoint catalog?"
-msgstr "Registar o Aodh no catálogo de \"endpoint\" do Keystone?"
+#| msgid "Register Aodh in the Keystone endpoint catalog?"
+msgid "Register Zaqar in the Keystone endpoint catalog?"
+msgstr "Registar o Zaqar no catálogo de \"endpoint\" do Keystone?"
 
 #. Type: boolean
 #. Description
@@ -55,13 +56,16 @@ msgstr "Endereço IP do servidor do Keystone:"
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:3001
+#| msgid ""
+#| "Please enter the IP address of the Keystone server, so that zaqar-server "
+#| "can contact Keystone to do the Aodh service and endpoint creation."
 msgid ""
 "Please enter the IP address of the Keystone server, so that zaqar-server can "
-"contact Keystone to do the Aodh service and endpoint creation."
+"contact Keystone to do the Zaqar service and endpoint creation."
 msgstr ""
-"Por favor indique o endereço IP do servidor Keystone, para que o "
-"zaqar-server possa contactar o Keystone para fazer o serviço Aodh e a "
-"criação do \"endpoint\"."
+"Por favor indique o endereço IP do servidor Keystone, para que o zaqar-"
+"server possa contactar o Keystone para fazer o serviço Zaqar e a criação do "
+"\"endpoint\"."
 
 #. Type: password
 #. Description
@@ -76,20 +80,22 @@ msgid ""
 "To configure its endpoint in Keystone, zaqar-server needs the Keystone "
 "authentication token."
 msgstr ""
-"Para configurar o seu endpoint no Keystone, o zaqar-server precisa do "
-"sinal de autenticação do Keystone."
+"Para configurar o seu endpoint no Keystone, o zaqar-server precisa do sinal "
+"de autenticação do Keystone."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
-msgid "Aodh endpoint IP address:"
-msgstr "Endereço IP endpoint do Aodh:"
+#| msgid "Aodh endpoint IP address:"
+msgid "Zaqar endpoint IP address:"
+msgstr "Endereço IP endpoint do Zaqar:"
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
-msgid "Please enter the IP address that will be used to contact Aodh."
-msgstr "Por favor indique o endereço IP que será usado para contactar o Aodh."
+#| msgid "Please enter the IP address that will be used to contact Aodh."
+msgid "Please enter the IP address that will be used to contact Zaqar."
+msgstr "Por favor indique o endereço IP que será usado para contactar o Zaqar."
 
 #. Type: string
 #. Description
@@ -136,8 +142,8 @@ msgid ""
 "(Keystone)."
 msgstr ""
 "Por favor especifique o nome de máquina do servidor de autenticação para o "
-"Zaqar. Tipicamente este é também o nome de máquina do Serviço de "
-"Identidade OpenStack (Keystone)."
+"Zaqar. Tipicamente este é também o nome de máquina do Serviço de Identidade "
+"OpenStack (Keystone)."
 
 #. Type: string
 #. Description
@@ -191,3 +197,4 @@ msgstr "Palavra passe do servidor de autenticação:"
 msgid "Please specify the password to use with the authentication server."
 msgstr ""
 "Por favor especifique a palavra passe a usar com o servidor de autenticação."
+
