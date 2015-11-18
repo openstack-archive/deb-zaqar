@@ -20,8 +20,6 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
-#, fuzzy
-#| msgid "Register Zaqar in the Keystone endpoint catalog?"
 msgid "Register Zaqar in the Keystone endpoint catalog?"
 msgstr "Enregistrer Zaqar dans le catalogue de points d'accès Keystone ?"
 
