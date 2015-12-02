@@ -1,9 +1,10 @@
-zaqar (1.0.0-6) UNRELEASED; urgency=medium
+zaqar (1.0.0-7) unstable; urgency=medium
 
   * Added French templates translation update (Closes: #805397).
   * Same for Portuguese (Closes: #805426).
+  * Same for Dutch (Closes: #805467).
 
- -- Thomas Goirand <zigo@debian.org>  Wed, 18 Nov 2015 01:00:35 +0100
+ -- Thomas Goirand <zigo@debian.org>  Wed, 02 Dec 2015 10:24:45 +0100
 
 zaqar (1.0.0-5) unstable; urgency=medium
 

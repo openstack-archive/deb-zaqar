@@ -1,14 +1,15 @@
 # Dutch translation of zaqar debconf templates.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the zaqar package.
-# Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2014.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: zaqar\n"
 "Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
 "POT-Creation-Date: 2015-09-17 09:04+0000\n"
-"PO-Revision-Date: 2014-10-10 16:01+0200\n"
+"PO-Revision-Date: 2015-11-05 15:43+0100\n"
 "Last-Translator: Frans Spiesschaert <Frans.Spiesschaert@yucom.be>\n"
 "Language-Team: Debian Dutch l10n Team <debian-l10n-dutch@lists.debian.org>\n"
 "Language: nl\n"
@@ -16,11 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
-msgid "Register Zaqar in the Keystone endpoint catalog?"
+msgid "Register Aodh in the Keystone endpoint catalog?"
 msgstr "Zaqar registreren in de catalogus van toegangspunten van Keystone?"
 
 #. Type: boolean
@@ -31,9 +33,9 @@ msgid ""
 "accessible. This is done using \"keystone service-create\" and \"keystone "
 "endpoint-create\". This can be done automatically now."
 msgstr ""
-"Elke OpenStackdienst (elke API) moet geregistreerd worden om toegankelijk te "
+"Elke OpenStack-service (elke API) moet geregistreerd zijn om toegankelijk te "
 "zijn. Dit gebeurt aan de hand van \"keystone service-create\" en \"keystone "
-"endpoint-create\". Dit kan nu automatisch gedaan worden."
+"endpoint-create\". Dit kan nu automatisch uitgevoerd worden."
 
 #. Type: boolean
 #. Description
@@ -42,9 +44,8 @@ msgid ""
 "Note that you will need to have an up and running Keystone server on which "
 "to connect using the Keystone authentication token."
 msgstr ""
-"Merk op dat u hiervoor een volledig werkende Keystone-server nodig heeft, "
-"waarmee een verbinding gemaakt wordt met behulp van het authenticatiebewijs "
-"voor Keystone."
+"Merk op dat u een volledig functionele Keystone-server nodig heeft waarmee u "
+"verbinding kunt maken met behulp van het legitimatiebewijs voor Keystone."
 
 #. Type: string
 #. Description
@@ -57,16 +58,16 @@ msgstr "IP-adres van de Keystone-server:"
 #: ../zaqar-server.templates:3001
 msgid ""
 "Please enter the IP address of the Keystone server, so that zaqar-server can "
-"contact Keystone to do the Zaqar service and endpoint creation."
+"contact Keystone to do the Aodh service and endpoint creation."
 msgstr ""
-"Gelieve het IP-adres van de Keystone-server op te geven, zodat zaqar-server met "
-"Keystone kan verbinden om de Zaqar-service en het toegangspunt aan te maken."
+"Gelieve het IP-adres van de Keystone-server op te geven, zodat zaqar-server "
+"Keystone kan contacteren om de Zaqar-dienst en het toegangspunt aan te maken."
 
 #. Type: password
 #. Description
 #: ../zaqar-server.templates:4001
 msgid "Keystone authentication token:"
-msgstr "Authenticatiebewijs voor Keystone:"
+msgstr "Legitimatiebewijs voor Keystone:"
 
 #. Type: password
 #. Description
@@ -75,22 +76,22 @@ msgid ""
 "To configure its endpoint in Keystone, zaqar-server needs the Keystone "
 "authentication token."
 msgstr ""
-"Om zijn toegangspunt te kunnen aanmaken in Keystone, heeft zaqar-server het "
-"authenticatiebewijs voor Keystone nodig."
+"Om zijn toegangspunt in Keystone te kunnen aanmaken, heeft zaqar-server het "
+"legitimatiebewijs voor Keystone nodig."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
-msgid "Zaqar endpoint IP address:"
-msgstr "IP-adres van het toegangspunt voor Zaqar:"
+msgid "Aodh endpoint IP address:"
+msgstr "IP-adres van het toegangspunt van Zaqar:"
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
-msgid "Please enter the IP address that will be used to contact Zaqar."
+msgid "Please enter the IP address that will be used to contact Aodh."
 msgstr ""
-"Gelieve het IP-adres in te voeren dat gebruikt zal worden om contact te "
-"maken met Zaqar."
+"Gelieve op te geven welk IP-adres gebruikt zal worden om Zaqar te "
+"contacteren."
 
 #. Type: string
 #. Description
@@ -100,7 +101,7 @@ msgid ""
 "service, so if you are installing a public cloud, this should be a public IP "
 "address."
 msgstr ""
-"Dit IP-adres moet bereikbaar zijn voor de clients die van deze service "
+"Dit IP-adres moet bereikbaar zijn vanaf de clients die van deze service "
 "gebruik zullen maken. Indien u een openbare cloud installeert, moet dit dus "
 "een algemeen bereikbaar IP-adres zijn."
 
@@ -118,9 +119,9 @@ msgid ""
 "location. Please enter the zone that you wish to use when registering the "
 "endpoint."
 msgstr ""
-"Openstack ondersteunt het gebruik van zones van beschikbaarheid, waarbij "
-"elke regio een locatie vertegenwoordigt. Geef aan welke zone u wenst te "
-"gebruiken bij het registreren van het toegangspunt."
+"OpenStack ondersteunt het gebruik van zones van beschikbaarheid, waarbij "
+"elke regio een locatie vertegenwoordigt. Gelieve aan te geven welke zone u "
+"wenst te gebruiken bij het registreren van het toegangspunt."
 
 #. Type: string
 #. Description
@@ -136,8 +137,9 @@ msgid ""
 "Typically this is also the hostname of the OpenStack Identity Service "
 "(Keystone)."
 msgstr ""
-"Geef de computernaam van de authenticatieserver. Meestal is dit ook de "
-"computernaam van de OpenStack Identiteitsdienst (Keystone)."
+"Gelieve de computernaam van de authenticatieserver voor Zaqar op te geven. "
+"Meestal is dit ook de computernaam van de OpenStack identiteitsdienst "
+"(Keystone)."
 
 #. Type: string
 #. Description
@@ -150,7 +152,7 @@ msgstr ""
 #. locataire ("tenant")
 #: ../zaqar-common.templates:3001
 msgid "Authentication server tenant name:"
-msgstr "Naam van de cliëntruimte (tenant) op de authenticatieserver:"
+msgstr "Naam van de clientruimte (tenant) op de authenticatieserver:"
 
 #. Type: string
 #. Description
@@ -164,20 +166,22 @@ msgstr "Naam van de cliëntruimte (tenant) op de authenticatieserver:"
 #: ../zaqar-common.templates:3001
 msgid "Please specify the authentication server tenant name."
 msgstr ""
-"Gelieve de naam te vermelden van de cliëntruimte (tenant) op de "
-"authenticatieserver."
+"Gelieve de naam van de clientruimte (tenant) op de authenticatieserver op te "
+"geven."
 
 #. Type: string
 #. Description
 #: ../zaqar-common.templates:4001
 msgid "Authentication server username:"
-msgstr "Gebruikersnaam voor de authenticatieserver:"
+msgstr "Gebruikersnaam op de authenticatieserver:"
 
 #. Type: string
 #. Description
 #: ../zaqar-common.templates:4001
 msgid "Please specify the username to use with the authentication server."
-msgstr "Geef de gebruikersnaam op voor de authenticatieserver."
+msgstr ""
+"Gelieve de gebruikersnaam te vermelden die op de authenticatieserver "
+"gebruikt zal worden."
 
 #. Type: password
 #. Description
@@ -189,79 +193,6 @@ msgstr "Wachtwoord voor de authenticatieserver:"
 #. Description
 #: ../zaqar-common.templates:5001
 msgid "Please specify the password to use with the authentication server."
-msgstr "Geef het wachtwoord op voor de authenticatieserver."
-
-#~ msgid "Set up a database for Zaqar?"
-#~ msgstr "Een database opzetten voor Zaqar?"
-
-#~ msgid ""
-#~ "No database has been set up for Zaqar to use. Before continuing, you "
-#~ "should make sure you have the following information:"
-#~ msgstr ""
-#~ "Er is geen database opgezet voor gebruik door Zaqar. Voor u doorgaat moet "
-#~ "u beschikken over de volgende informatie:"
-
-#~ msgid ""
-#~ " * the type of database that you want to use;\n"
-#~ " * the database server hostname (that server must allow TCP connections "
-#~ "from this\n"
-#~ "   machine);\n"
-#~ " * a username and password to access the database."
-#~ msgstr ""
-#~ " * het type database dat u wenst te gebruiken;\n"
-#~ " * de computernaam van de database-server (die server moet\n"
-#~ "   TCP-verbindingen vanaf deze computer accepteren);\n"
-#~ " * een gebruikersnaam en wachtwoord voor toegang tot de database."
-
-#~ msgid ""
-#~ "If some of these requirements are missing, do not choose this option and "
-#~ "run with regular SQLite support."
-#~ msgstr ""
-#~ "Indien sommige van deze gegevens ontbreken, moet u deze optie niet kiezen "
-#~ "en de toepassing gebruiken met gewone SQLite-ondersteuning."
-
-#~ msgid ""
-#~ "You can change this setting later on by running \"dpkg-reconfigure -plow "
-#~ "zaqar\"."
-#~ msgstr ""
-#~ "U kunt deze instelling later wijzigen door het uitvoeren van \"dpkg-"
-#~ "reconfigure -plow zaqar\". "
-
-#~ msgid "Zaqar volume group:"
-#~ msgstr "Volumegroep voor Zaqar:"
-
-#~ msgid ""
-#~ "Please specify the name of the LVM volume group on which Zaqar will "
-#~ "create partitions."
-#~ msgstr ""
-#~ "Geef de naam op van de LVM-volumegroep waarop Zaqar partities zal "
-#~ "aanmaken."
-
-#~ msgid "IP address of your RabbitMQ host:"
-#~ msgstr "IP-adres van uw RabbitMQ-computer:"
-
-#~ msgid ""
-#~ "In order to interoperate with other components of OpenStack, this package "
-#~ "needs to connect to a central RabbitMQ server."
-#~ msgstr ""
-#~ "Om te kunnen samenwerken met andere componenten van OpenStack, moet dit "
-#~ "pakket verbinding kunnen maken met een centrale RabbitMQ-server."
-
-#~ msgid "Please specify the IP address of that server."
-#~ msgstr "Geef het IP-adres op van die server."
-
-#~ msgid "Username for connection to the RabbitMQ server:"
-#~ msgstr "Gebruikersnaam voor de verbinding met de RabbitMQ-server:"
-
-#~ msgid "Please specify the username used to connect to the RabbitMQ server."
-#~ msgstr ""
-#~ "Geef de gebruikersnaam op die u nodig heeft om verbinding te maken met de "
-#~ "RabbitMQ-server."
-
-#~ msgid "Password for connection to the RabbitMQ server:"
-#~ msgstr "Wachtwoord voor de verbinding met de RabbitMQ-server:"
-
-#~ msgid "Please specify the password used to connect to the RabbitMQ server."
-#~ msgstr ""
-#~ "Gelieve het wachtwoord te geven dat u nodig heeft om verbinding te maken "
-#~ "met de RabbitMQ-server."
+msgstr ""
+"Gelieve het wachtwoord te vermelden dat op de authenticatieserver gebruikt "
+"zal worden."
