@@ -1,4 +1,4 @@
-zaqar (1.0.0-7) unstable; urgency=medium
+zaqar (1.0.0-6) unstable; urgency=medium
 
   * Added French templates translation update (Closes: #805397).
   * Same for Portuguese (Closes: #805426).
