@@ -155,12 +155,13 @@ class QueueController(storage.Queue):
             cursor = self._pool_catalog._pools_ctrl.list(limit=0)
             pools_list = list(next(cursor))
             anypool = pools_list and pools_list[0]
-            yield next(self._pool_catalog.get_driver(anypool['name'])
-                       .queue_controller.list(
-                           project=project,
-                           marker=marker,
-                           limit=limit,
-                           detailed=detailed))
+            if anypool:
+                yield next(self._pool_catalog.get_driver(anypool['name'])
+                           .queue_controller.list(
+                               project=project,
+                               marker=marker,
+                               limit=limit,
+                               detailed=detailed))
 
         # make a heap compared with 'name'
         ls = heapq.merge(*[
@@ -487,15 +488,16 @@ class Catalog(object):
 
             if flavor is not None:
                 flavor = self._flavor_ctrl.get(flavor, project=project)
-                pools = self._pools_ctrl.get_group(group=flavor['pool'],
-                                                   detailed=True)
+                pools = self._pools_ctrl.get_pools_by_group(
+                    group=flavor['pool'],
+                    detailed=True)
                 pool = select.weighted(pools)
                 pool = pool and pool['name'] or None
             else:
                 # NOTE(flaper87): Get pools assigned to the default
                 # group `None`. We should consider adding a `default_group`
                 # option in the future.
-                pools = self._pools_ctrl.get_group(detailed=True)
+                pools = self._pools_ctrl.get_pools_by_group(detailed=True)
                 pool = select.weighted(pools)
                 pool = pool and pool['name'] or None
 

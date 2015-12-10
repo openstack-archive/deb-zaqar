@@ -25,8 +25,8 @@ import pymongo.errors
 import six
 from testtools import matchers
 
+from zaqar.common import cache as oslo_cache
 from zaqar.common import configs
-from zaqar.openstack.common.cache import cache as oslo_cache
 from zaqar import storage
 from zaqar.storage import errors
 from zaqar.storage import mongodb
@@ -78,28 +78,28 @@ class MongodbUtilsTest(MongodbSetupMixin, testing.TestBase):
         self.control_driver = MockDriver(self.mongodb_conf)
 
     def test_scope_queue_name(self):
-        self.assertEqual(utils.scope_queue_name('my-q'), '/my-q')
-        self.assertEqual(utils.scope_queue_name('my-q', None), '/my-q')
-        self.assertEqual(utils.scope_queue_name('my-q', '123'), '123/my-q')
+        self.assertEqual('/my-q', utils.scope_queue_name('my-q'))
+        self.assertEqual('/my-q', utils.scope_queue_name('my-q', None))
+        self.assertEqual('123/my-q', utils.scope_queue_name('my-q', '123'))
 
-        self.assertEqual(utils.scope_queue_name(None), '/')
-        self.assertEqual(utils.scope_queue_name(None, '123'), '123/')
+        self.assertEqual('/', utils.scope_queue_name(None))
+        self.assertEqual('123/', utils.scope_queue_name(None, '123'))
 
     def test_descope_queue_name(self):
-        self.assertEqual(utils.descope_queue_name('/'), None)
-        self.assertEqual(utils.descope_queue_name('/some-pig'), 'some-pig')
-        self.assertEqual(utils.descope_queue_name('radiant/some-pig'),
-                         'some-pig')
+        self.assertEqual(None, utils.descope_queue_name('/'))
+        self.assertEqual('some-pig', utils.descope_queue_name('/some-pig'))
+        self.assertEqual('some-pig',
+                         utils.descope_queue_name('radiant/some-pig'))
 
     def test_calculate_backoff(self):
         sec = utils.calculate_backoff(0, 10, 2, 0)
-        self.assertEqual(sec, 0)
+        self.assertEqual(0, sec)
 
         sec = utils.calculate_backoff(9, 10, 2, 0)
-        self.assertEqual(sec, 1.8)
+        self.assertEqual(1.8, sec)
 
         sec = utils.calculate_backoff(4, 10, 2, 0)
-        self.assertEqual(sec, 0.8)
+        self.assertEqual(0.8, sec)
 
         sec = utils.calculate_backoff(4, 10, 2, 1)
         if sec != 0.8:
@@ -127,7 +127,7 @@ class MongodbUtilsTest(MongodbSetupMixin, testing.TestBase):
 
         self.assertRaises(pymongo.errors.AutoReconnect,
                           _raises_autoreconnect, self)
-        self.assertEqual(num_calls, [self.mongodb_conf.max_reconnect_attempts])
+        self.assertEqual([self.mongodb_conf.max_reconnect_attempts], num_calls)
 
     def test_retries_on_autoreconnect_neg(self):
         num_calls = [0]
@@ -143,7 +143,7 @@ class MongodbUtilsTest(MongodbSetupMixin, testing.TestBase):
         # NOTE(kgriffs): Test that this does *not* raise AutoReconnect
         _raises_autoreconnect(self)
 
-        self.assertEqual(num_calls, [self.mongodb_conf.max_reconnect_attempts])
+        self.assertEqual([self.mongodb_conf.max_reconnect_attempts], num_calls)
 
 
 @testing.requires_mongodb
@@ -156,10 +156,11 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
 
         self.conf.register_opts(configs._GENERAL_OPTIONS)
         self.config(unreliable=False)
+        oslo_cache.register_config(self.conf)
 
     def test_db_instance(self):
         self.config(unreliable=True)
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
         control = mongodb.ControlDriver(self.conf, cache)
         data = mongodb.DataDriver(self.conf, cache, control)
 
@@ -169,7 +170,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
 
     def test_version_match(self):
         self.config(unreliable=True)
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
 
         with mock.patch('pymongo.MongoClient.server_info') as info:
             info.return_value = {'version': '2.1'}
@@ -186,7 +187,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
                 self.fail('version match failed')
 
     def test_replicaset_or_mongos_needed(self):
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
 
         with mock.patch('pymongo.MongoClient.nodes') as nodes:
             nodes.__get__ = mock.Mock(return_value=[])
@@ -197,7 +198,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
                                   mongodb.ControlDriver(self.conf, cache))
 
     def test_using_replset(self):
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
 
         with mock.patch('pymongo.MongoClient.nodes') as nodes:
             nodes.__get__ = mock.Mock(return_value=['node1', 'node2'])
@@ -209,7 +210,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
                                    mongodb.ControlDriver(self.conf, cache))
 
     def test_using_mongos(self):
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
 
         with mock.patch('pymongo.MongoClient.is_mongos') as is_mongos:
             is_mongos.__get__ = mock.Mock(return_value=True)
@@ -221,7 +222,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
                                    mongodb.ControlDriver(self.conf, cache))
 
     def test_write_concern_check_works(self):
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
 
         with mock.patch('pymongo.MongoClient.is_mongos') as is_mongos:
             is_mongos.__get__ = mock.Mock(return_value=True)
@@ -239,7 +240,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
                                    mongodb.ControlDriver(self.conf, cache))
 
     def test_write_concern_is_set(self):
-        cache = oslo_cache.get_cache()
+        cache = oslo_cache.get_cache(self.conf)
 
         with mock.patch('pymongo.MongoClient.is_mongos') as is_mongos:
             is_mongos.__get__ = mock.Mock(return_value=True)
@@ -253,8 +254,8 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
             for db in driver.message_databases:
                 wc = db.write_concern
 
-                self.assertEqual(wc.document['w'], 'majority')
-                self.assertEqual(wc.document['j'], False)
+                self.assertEqual('majority', wc.document['w'])
+                self.assertEqual(False, wc.document['j'])
 
 
 @testing.requires_mongodb
@@ -313,7 +314,7 @@ class MongodbMessageTests(MongodbSetupMixin, base.MessageControllerTest):
 
         seed_marker1 = self.controller._get_counter(queue_name,
                                                     self.project)
-        self.assertEqual(seed_marker1, 0, 'First marker is 0')
+        self.assertEqual(0, seed_marker1, 'First marker is 0')
 
         for i in range(iterations):
             self.controller.post(queue_name, [{'ttl': 60}],
@@ -328,7 +329,7 @@ class MongodbMessageTests(MongodbSetupMixin, base.MessageControllerTest):
 
             self.assertEqual(marker1, marker2)
             self.assertEqual(marker2, marker3)
-            self.assertEqual(marker1, i + 1)
+            self.assertEqual(i + 1, marker1)
 
         new_value = self.controller._inc_counter(queue_name,
                                                  self.project)
@@ -341,7 +342,7 @@ class MongodbMessageTests(MongodbSetupMixin, base.MessageControllerTest):
         self.assertIsNotNone(new_value)
         value_after = self.controller._get_counter(queue_name,
                                                    project=self.project)
-        self.assertEqual(value_after, value_before + 1)
+        self.assertEqual(value_before + 1, value_after)
 
         value_before = value_after
         new_value = self.controller._inc_counter(queue_name,
@@ -349,8 +350,8 @@ class MongodbMessageTests(MongodbSetupMixin, base.MessageControllerTest):
                                                  amount=7)
         value_after = self.controller._get_counter(queue_name,
                                                    project=self.project)
-        self.assertEqual(value_after, value_before + 7)
-        self.assertEqual(value_after, new_value)
+        self.assertEqual(value_before + 7, value_after)
+        self.assertEqual(new_value, value_after)
 
         reference_value = value_after
 
@@ -365,7 +366,7 @@ class MongodbMessageTests(MongodbSetupMixin, base.MessageControllerTest):
         changed = self.controller._inc_counter(queue_name,
                                                project=self.project,
                                                window=5)
-        self.assertEqual(changed, reference_value + 1)
+        self.assertEqual(reference_value + 1, changed)
 
         timeutils.clear_time_override()
 
@@ -423,7 +424,7 @@ class MongodbFIFOMessageTests(MongodbSetupMixin, base.MessageControllerTest):
             created = list(self.controller.post(queue_name,
                                                 messages, uuid,
                                                 project=self.project))
-            self.assertEqual(len(created), 1)
+            self.assertEqual(1, len(created))
 
             # Force infinite retries
             ic.return_value = None
@@ -436,7 +437,7 @@ class MongodbFIFOMessageTests(MongodbSetupMixin, base.MessageControllerTest):
                                             expected_messages[1:],
                                             uuid, project=self.project))
 
-        self.assertEqual(len(created), 2)
+        self.assertEqual(2, len(created))
 
         expected_ids = [m['body']['backupId'] for m in expected_messages]
 
@@ -444,10 +445,10 @@ class MongodbFIFOMessageTests(MongodbSetupMixin, base.MessageControllerTest):
                                            echo=True, project=self.project)
 
         actual_messages = list(next(interaction))
-        self.assertEqual(len(actual_messages), len(expected_messages))
+        self.assertEqual(len(expected_messages), len(actual_messages))
         actual_ids = [m['body']['backupId'] for m in actual_messages]
 
-        self.assertEqual(actual_ids, expected_ids)
+        self.assertEqual(expected_ids, actual_ids)
 
 
 @testing.requires_mongodb

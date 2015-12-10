@@ -14,10 +14,11 @@
 # limitations under the License.
 
 import msgpack
+from oslo_cache import core
 from oslo_config import cfg
 
+from zaqar.common import cache as oslo_cache
 from zaqar.common import decorators
-from zaqar.openstack.common.cache import cache as oslo_cache
 from zaqar.tests import base
 
 
@@ -33,13 +34,14 @@ class TestDecorators(base.TestBase):
 
         instance = TestClass()
         result = instance.testing
-        self.assertEqual(result, 'testing')
+        self.assertEqual('testing', result)
         self.assertIn('testing', instance.__dict__)
 
     def test_cached(self):
         conf = cfg.ConfigOpts()
-        oslo_cache.register_oslo_configs(conf)
-        cache = oslo_cache.get_cache(conf.cache_url)
+        oslo_cache.register_config(conf)
+        conf.cache.backend = 'dogpile.cache.memory'
+        cache = oslo_cache.get_cache(conf)
 
         sample_project = {
             u'name': u'Cats Abound',
@@ -71,32 +73,33 @@ class TestDecorators(base.TestBase):
         args = ('23', 'cats')
 
         project = instance.get_project(*args)
-        self.assertEqual(project, sample_project)
-        self.assertEqual(instance.project_gets, 1)
+        self.assertEqual(sample_project, project)
+        self.assertEqual(1, instance.project_gets)
 
         # Should be in the cache now.
         project = msgpack.unpackb(cache.get(create_key(*args)),
                                   encoding='utf-8')
-        self.assertEqual(project, sample_project)
+        self.assertEqual(sample_project, project)
 
         # Should read from the cache this time (counter will not
         # be incremented).
         project = instance.get_project(*args)
-        self.assertEqual(project, sample_project)
-        self.assertEqual(instance.project_gets, 1)
+        self.assertEqual(sample_project, project)
+        self.assertEqual(1, instance.project_gets)
 
         # Use kwargs this time
         instance.del_project('23', project='cats')
-        self.assertEqual(instance.project_dels, 1)
+        self.assertEqual(1, instance.project_dels)
 
         # Should be a cache miss since we purged (above)
         project = instance.get_project(*args)
-        self.assertEqual(instance.project_gets, 2)
+        self.assertEqual(2, instance.project_gets)
 
     def test_cached_with_cond(self):
         conf = cfg.ConfigOpts()
-        oslo_cache.register_oslo_configs(conf)
-        cache = oslo_cache.get_cache(conf.cache_url)
+        oslo_cache.register_config(conf)
+        conf.cache.backend = 'dogpile.cache.memory'
+        cache = oslo_cache.get_cache(conf)
 
         class TestClass(object):
 
@@ -114,25 +117,25 @@ class TestDecorators(base.TestBase):
         name = 'malini'
 
         user = instance.get_user(name)
-        self.assertEqual(user, name)
-        self.assertEqual(instance.user_gets, 1)
+        self.assertEqual(name, user)
+        self.assertEqual(1, instance.user_gets)
 
         # Should be in the cache now.
         user = msgpack.unpackb(cache.get(name), encoding='utf-8')
-        self.assertEqual(user, name)
+        self.assertEqual(name, user)
 
         # Should read from the cache this time (counter will not
         # be incremented).
         user = instance.get_user(name)
-        self.assertEqual(user, name)
-        self.assertEqual(instance.user_gets, 1)
+        self.assertEqual(name, user)
+        self.assertEqual(1, instance.user_gets)
 
         # Won't go into the cache because of cond
         name = 'kgriffs'
         for i in range(3):
             user = instance.get_user(name)
 
-            self.assertEqual(cache.get(name), None)
+            self.assertEqual(cache.get(name), core.NO_VALUE)
 
-            self.assertEqual(user, name)
-            self.assertEqual(instance.user_gets, 2 + i)
+            self.assertEqual(name, user)
+            self.assertEqual(2 + i, instance.user_gets)

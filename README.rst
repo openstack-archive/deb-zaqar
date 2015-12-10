@@ -15,10 +15,10 @@ all of these steps are required. It is assumed you have `MongoDB`_ and `tox`
 1. Install prerequisites:
 
 # Ubuntu/Debian:
-sudo apt-get install gcc python-pip libxml2-dev libxslt1-dev
+sudo apt-get install gcc python-pip libxml2-dev libxslt1-dev python-dev zlib1g-dev
 
 # Fedora/RHEL:
-sudo yum install gcc python-pip libxml2-devel libxslt-devel
+sudo yum install gcc python-pip libxml2-devel libxslt-devel python-devel
 
 2. From your home folder create the ``~/.zaqar`` folder and clone the repo::
 
@@ -51,6 +51,11 @@ sudo yum install gcc python-pip libxml2-devel libxslt-devel
    By default, you will have::
 
     uri = mongodb://127.0.0.1:27017
+
+   NOTE: If your local dev/test mongodb doesn't enable the replica set, then
+   you have to set below in [default] section::
+
+    unreliable = True
 
 5. For logging, find the ``[handler_file]`` section in 
    ``~/.zaqar/logging.conf`` and modify as desired::
