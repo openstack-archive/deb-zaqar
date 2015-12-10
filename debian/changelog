@@ -1,3 +1,10 @@
+zaqar (2.0.0~b1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 10 Dec 2015 15:46:17 +0100
+
 zaqar (1.0.0-6) unstable; urgency=medium
 
   * Added French templates translation update (Closes: #805397).
