@@ -49,7 +49,7 @@ Build-Depends-Indep: mongodb,
                      python-testtools (>= 1.4.0),
                      python-trollius,
                      python-webob,
-                     python-websocket-client,
+                     python-websocket,
                      subunit,
                      testrepository,
 Standards-Version: 3.9.6
