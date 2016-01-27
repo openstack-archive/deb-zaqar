@@ -39,9 +39,11 @@ override_dh_clean:
 		debian/*.service debian/*.init debian/*.upstart
 
 override_dh_install:
+	rm -rf $(CURDIR)/debian/tmp
+	python2.7 setup.py install --install-layout=deb --root=$(CURDIR)/debian/tmp
 	dh_install --fail-missing
 	mkdir -p $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common
-	PYTHONPATH=. oslo-config-generator --output-file $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common/zaqar.conf \
+	PYTHONPATH=$(CURDIR)/debian/tmp/usr/lib/python2.7/dist-packages oslo-config-generator --output-file $(CURDIR)/debian/zaqar-common/usr/share/zaqar-common/zaqar.conf \
 		--namespace zaqar.bootstrap \
 		--namespace zaqar.common.configs \
 		--namespace zaqar.storage.pipeline \
