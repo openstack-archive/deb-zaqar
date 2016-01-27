@@ -17,7 +17,6 @@
 
 import ssl
 
-from oslo_log import log as logging
 import pymongo
 import pymongo.errors
 
@@ -26,9 +25,6 @@ from zaqar.i18n import _
 from zaqar import storage
 from zaqar.storage.mongodb import controllers
 from zaqar.storage.mongodb import options
-
-
-LOG = logging.getLogger(__name__)
 
 
 def _connection(conf):
@@ -45,7 +41,7 @@ def _connection(conf):
         MongoClient = pymongo.MongoClient
 
     if conf.uri and 'ssl=true' in conf.uri.lower():
-        kwargs = {}
+        kwargs = {'connect': False}
 
         # Default to CERT_REQUIRED
         ssl_cert_reqs = ssl.CERT_REQUIRED
@@ -67,7 +63,7 @@ def _connection(conf):
 
         return MongoClient(uri, **kwargs)
 
-    return MongoClient(uri)
+    return MongoClient(uri, connect=False)
 
 
 class DataDriver(storage.DataDriverBase):

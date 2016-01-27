@@ -24,10 +24,10 @@ from gevent import monkey as curious_george
 curious_george.patch_all(thread=False, select=False)
 import gevent
 import marktime
-from zaqarclient.queues import client
 from zaqarclient.transport import errors
 
 from zaqar.bench import config
+from zaqar.bench import helpers
 
 CONF = config.conf
 
@@ -95,9 +95,10 @@ def claim_delete(queues, stats, test_duration, ttl, grace, limit):
 def load_generator(stats, num_workers, num_queues,
                    test_duration, url, ttl, grace, limit):
 
-    cli = client.Client(CONF.server_url)
-    queues = [cli.queue(CONF.queue_prefix + '-' + str(i))
-              for i in range(num_queues)]
+    cli = helpers.get_new_client()
+    queues = []
+    for queue_name in helpers.queue_names:
+        queues.append(cli.queue(queue_name))
 
     gevent.joinall([
         gevent.spawn(claim_delete,

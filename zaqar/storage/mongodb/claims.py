@@ -24,7 +24,6 @@ Field Mappings:
 import datetime
 
 from bson import objectid
-from oslo_log import log as logging
 from oslo_utils import timeutils
 
 from zaqar import storage
@@ -32,7 +31,17 @@ from zaqar.storage import errors
 from zaqar.storage.mongodb import utils
 
 
-LOG = logging.getLogger(__name__)
+def _messages_iter(msg_iter):
+    """Used to iterate through messages."""
+
+    msg = next(msg_iter)
+    yield msg.pop('claim')
+    yield msg
+
+    # Smoke it!
+    for msg in msg_iter:
+        del msg['claim']
+        yield msg
 
 
 class ClaimController(storage.Claim):
@@ -67,22 +76,12 @@ class ClaimController(storage.Claim):
         if cid is None:
             raise errors.ClaimDoesNotExist(queue, project, claim_id)
 
-        def messages(msg_iter):
-            msg = next(msg_iter)
-            yield msg.pop('claim')
-            yield msg
-
-            # Smoke it!
-            for msg in msg_iter:
-                del msg['claim']
-                yield msg
-
         try:
             # Lets get claim's data
             # from the first message
             # in the iterator
-            msgs = messages(msg_ctrl._claimed(queue, cid, now,
-                                              project=project))
+            msgs = _messages_iter(msg_ctrl._claimed(queue, cid, now,
+                                                    project=project))
             claim = next(msgs)
 
             update_time = claim['e'] - claim['t']

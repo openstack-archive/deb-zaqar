@@ -86,7 +86,7 @@ class MongodbUtilsTest(MongodbSetupMixin, testing.TestBase):
         self.assertEqual('123/', utils.scope_queue_name(None, '123'))
 
     def test_descope_queue_name(self):
-        self.assertEqual(None, utils.descope_queue_name('/'))
+        self.assertIsNone(utils.descope_queue_name('/'))
         self.assertEqual('some-pig', utils.descope_queue_name('/some-pig'))
         self.assertEqual('some-pig',
                          utils.descope_queue_name('radiant/some-pig'))
@@ -255,7 +255,7 @@ class MongodbDriverTest(MongodbSetupMixin, testing.TestBase):
                 wc = db.write_concern
 
                 self.assertEqual('majority', wc.document['w'])
-                self.assertEqual(False, wc.document['j'])
+                self.assertFalse(wc.document['j'])
 
 
 @testing.requires_mongodb
