@@ -2,12 +2,12 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Zaqar
 Source: git://github.com/openstack/zaqar.git
 
-Files: debian/*
-Copyright: (c) 2015, Thomas Goirand <zigo@debian.org>
+Files: *
+Copyright: (c) 2012-2016, OpenStack Foundation
 License: Apache-2
 
-Files: *
-Copyright: (c) 2012-2015, OpenStack Foundation
+Files: debian/*
+Copyright: (c) 2015-2016, Thomas Goirand <zigo@debian.org>
 License: Apache-2
 
 License: Apache-2
