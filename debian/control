@@ -53,8 +53,8 @@ Build-Depends-Indep: mongodb,
                      subunit,
                      testrepository,
 Standards-Version: 3.9.6
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/zaqar.git;a=summary
-Vcs-Git: git://anonscm.debian.org/openstack/zaqar.git
+Vcs-Browser: https://anonscm.debian.org/gitweb/?p=openstack/zaqar.git;a=summary
+Vcs-Git: https://anonscm.debian.org/git/openstack/zaqar.git
 Homepage: https://github.com/openstack/zaqar/
 
 Package: python-zaqar
