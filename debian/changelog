@@ -1,3 +1,9 @@
+zaqar (2.0.0~b2-2) experimental; urgency=medium
+
+  * Updated nl.po debconf translation (Closes: #812350).
+
+ -- Thomas Goirand <zigo@debian.org>  Sat, 06 Feb 2016 13:09:49 +0800
+
 zaqar (2.0.0~b2-1) experimental; urgency=medium
 
   * New upstream release.
