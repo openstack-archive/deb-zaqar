@@ -42,7 +42,7 @@ class Endpoints(object):
         self._subscription_url = None
 
     # Queues
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def queue_list(self, req):
         """Gets a list of queues
 
@@ -62,6 +62,8 @@ class Endpoints(object):
             self._validate.queue_listing(**kwargs)
             results = self._queue_controller.list(
                 project=project_id, **kwargs)
+            # Buffer list of queues. Can raise NoPoolFound error.
+            queues = list(next(results))
         except (ValueError, validation.ValidationFailed) as ex:
             LOG.debug(ex)
             headers = {'status': 400}
@@ -70,10 +72,7 @@ class Endpoints(object):
             LOG.exception(ex)
             error = 'Queues could not be listed.'
             headers = {'status': 503}
-            return api_utils.error_response(req, ex, error, headers)
-
-        # Buffer list of queues
-        queues = list(next(results))
+            return api_utils.error_response(req, ex, headers, error)
 
         # Got some. Prepare the response.
         body = {'queues': queues}
@@ -81,7 +80,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def queue_create(self, req):
         """Creates a queue
 
@@ -101,6 +100,7 @@ class Endpoints(object):
         try:
             self._validate.queue_identification(queue_name, project_id)
             self._validate.queue_metadata_length(len(str(metadata)))
+            self._validate.queue_metadata_putting(metadata)
             created = self._queue_controller.create(queue_name,
                                                     metadata=metadata,
                                                     project=project_id)
@@ -118,7 +118,7 @@ class Endpoints(object):
             headers = {'status': 201} if created else {'status': 204}
             return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def queue_delete(self, req):
         """Deletes a queue
 
@@ -144,7 +144,7 @@ class Endpoints(object):
             headers = {'status': 204}
             return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def queue_get(self, req):
         """Gets a queue
 
@@ -178,7 +178,7 @@ class Endpoints(object):
             headers = {'status': 200}
             return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def queue_get_stats(self, req):
         """Gets queue stats
 
@@ -220,7 +220,7 @@ class Endpoints(object):
             return response.Response(req, body, headers)
 
     # Messages
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def message_list(self, req):
         """Gets a list of messages on a queue
 
@@ -272,7 +272,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def message_get(self, req):
         """Gets a message from a queue
 
@@ -309,7 +309,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def message_get_many(self, req):
         """Gets a set of messages from a queue
 
@@ -347,7 +347,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def message_post(self, req):
         """Post a set of messages to a queue
 
@@ -372,17 +372,40 @@ class Endpoints(object):
             return api_utils.error_response(req, ex, headers, error)
 
         try:
+            # NOTE(flwang): Replace 'exists' with 'get_metadata' won't impact
+            # the performance since both of them will call
+            # collection.find_one()
+            queue_meta = None
+            try:
+                queue_meta = self._queue_controller.get_metadata(queue_name,
+                                                                 project_id)
+            except storage_errors.DoesNotExist as ex:
+                self._validate.queue_identification(queue_name, project_id)
+                self._queue_controller.create(queue_name, project=project_id)
+                # NOTE(flwang): Queue is created in lazy mode, so no metadata
+                # set.
+                queue_meta = {}
+
+            queue_max_msg_size = queue_meta.get('_max_messages_post_size',
+                                                None)
+            queue_default_ttl = queue_meta.get('_default_message_ttl', None)
+
+            # TODO(flwang): To avoid any unexpected regression issue, we just
+            # leave the _message_post_spec attribute of class as it's. It
+            # should be removed in Newton release.
+            if queue_default_ttl:
+                _message_post_spec = (('ttl', int, queue_default_ttl),
+                                      ('body', '*', None),)
+            else:
+                _message_post_spec = (('ttl', int, self._defaults.message_ttl),
+                                      ('body', '*', None),)
             # Place JSON size restriction before parsing
-            self._validate.message_length(len(str(messages)))
+            self._validate.message_length(len(str(messages)),
+                                          max_msg_post_size=queue_max_msg_size)
         except validation.ValidationFailed as ex:
             LOG.debug(ex)
             headers = {'status': 400}
             return api_utils.error_response(req, ex, headers)
-
-        _message_post_spec = (
-            ('ttl', int, self._defaults.message_ttl),
-            ('body', '*', None),
-        )
 
         try:
             messages = api_utils.sanitize(messages,
@@ -397,10 +420,6 @@ class Endpoints(object):
             client_uuid = api_utils.get_client_uuid(req)
 
             self._validate.message_posting(messages)
-
-            if not self._queue_controller.exists(queue_name, project_id):
-                self._validate.queue_identification(queue_name, project_id)
-                self._queue_controller.create(queue_name, project=project_id)
 
             message_ids = self._message_controller.post(
                 queue_name,
@@ -427,7 +446,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def message_delete(self, req):
         """Delete a message from a queue
 
@@ -478,7 +497,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def message_delete_many(self, req):
         """Deletes a set of messages from a queue
 
@@ -511,7 +530,7 @@ class Endpoints(object):
         elif pop_limit:
             return self._pop_messages(req, queue_name, project_id, pop_limit)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def _delete_messages_by_id(self, req, queue_name, ids, project_id):
         self._message_controller.bulk_delete(queue_name, message_ids=ids,
                                              project=project_id)
@@ -521,7 +540,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def _pop_messages(self, req, queue_name, project_id, pop_limit):
 
         LOG.debug(u'Pop messages - queue: %(queue)s, project: %(project)s',
@@ -542,7 +561,7 @@ class Endpoints(object):
         return response.Response(req, body, headers)
 
     # Claims
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def claim_create(self, req):
         """Creates a claim
 
@@ -608,7 +627,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def claim_get(self, req):
         """Gets a claim
 
@@ -653,7 +672,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def claim_update(self, req):
         """Updates a claim
 
@@ -700,7 +719,7 @@ class Endpoints(object):
             headers = {'status': 404}
             return api_utils.error_response(req, ex, headers, error)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def claim_delete(self, req):
         """Deletes a claim
 
@@ -729,7 +748,7 @@ class Endpoints(object):
         return response.Response(req, body, headers)
 
     # Subscriptions
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def subscription_list(self, req):
         """List all subscriptions for a queue.
 
@@ -750,6 +769,8 @@ class Endpoints(object):
             self._validate.subscription_listing(**kwargs)
             results = self._subscription_controller.list(
                 queue_name, project=project_id, **kwargs)
+            # Buffer list of subscriptions. Can raise NoPoolFound error.
+            subscriptions = list(next(results))
         except (ValueError, validation.ValidationFailed) as ex:
             LOG.debug(ex)
             headers = {'status': 400}
@@ -758,10 +779,7 @@ class Endpoints(object):
             LOG.exception(ex)
             error = 'Subscriptions could not be listed.'
             headers = {'status': 503}
-            return api_utils.error_response(req, ex, error, headers)
-
-        # Buffer list of queues
-        subscriptions = list(next(results))
+            return api_utils.error_response(req, ex, headers, error)
 
         # Got some. Prepare the response.
         body = {'subscriptions': subscriptions}
@@ -769,7 +787,7 @@ class Endpoints(object):
 
         return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def subscription_create(self, req, subscriber):
         """Create a subscription for a queue.
 
@@ -820,7 +838,7 @@ class Endpoints(object):
                 headers = {'status': 409}
             return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def subscription_delete(self, req):
         """Delete a specific subscription by ID.
 
@@ -852,7 +870,7 @@ class Endpoints(object):
             headers = {'status': 204}
             return response.Response(req, body, headers)
 
-    @api_utils.raises_conn_error
+    @api_utils.on_exception_sends_500
     def subscription_get(self, req):
         """Retrieve details about an existing subscription.
 

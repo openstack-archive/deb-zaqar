@@ -36,6 +36,10 @@ class MailtoTask(object):
             for message in messages:
                 p = subprocess.Popen(conf.notification.smtp_command.split(' '),
                                      stdin=subprocess.PIPE)
+                # NOTE(Eva-i): Unfortunately this will add 'queue_name' key to
+                # our original messages(dicts) which will be later consumed in
+                # the storage controller. It seems safe though.
+                message['queue_name'] = subscription['source']
                 msg = text.MIMEText(json.dumps(message))
                 msg["to"] = subscriber.path
                 msg["from"] = subscription['options'].get('from', '')
@@ -43,8 +47,7 @@ class MailtoTask(object):
                 msg["subject"] = params.get('subject', subject_opt)
                 p.communicate(msg.as_string())
         except OSError as err:
-            LOG.error(_LE('Failed to create process for sendmail, '
-                          'because %s') % str(err))
+            LOG.exception(_LE('Failed to create process for sendmail, '
+                              'because %s.') % str(err))
         except Exception as exc:
-            LOG.exception(_LE('Failed to send email'))
-            LOG.exception(exc)
+            LOG.exception(_LE('Failed to send email because %s.') % str(exc))

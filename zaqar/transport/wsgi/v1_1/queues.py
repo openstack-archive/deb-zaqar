@@ -46,7 +46,7 @@ class ItemResource(object):
 
         except storage_errors.DoesNotExist as ex:
             LOG.debug(ex)
-            raise falcon.HTTPNotFound()
+            raise wsgi_errors.HTTPNotFound(six.text_type(ex))
 
         except Exception as ex:
             LOG.exception(ex)
@@ -123,6 +123,9 @@ class CollectionResource(object):
             self._validate.queue_listing(**kwargs)
             results = self._queue_controller.list(project=project_id, **kwargs)
 
+            # Buffer list of queues
+            queues = list(next(results))
+
         except validation.ValidationFailed as ex:
             LOG.debug(ex)
             raise wsgi_errors.HTTPBadRequestAPI(six.text_type(ex))
@@ -131,9 +134,6 @@ class CollectionResource(object):
             LOG.exception(ex)
             description = _(u'Queues could not be listed.')
             raise wsgi_errors.HTTPServiceUnavailable(description)
-
-        # Buffer list of queues
-        queues = list(next(results))
 
         # Got some. Prepare the response.
         kwargs['marker'] = next(results) or kwargs.get('marker', '')

@@ -151,7 +151,7 @@ class Resource(object):
 
         except errors.PoolDoesNotExist as ex:
             LOG.debug(ex)
-            raise falcon.HTTPNotFound()
+            raise wsgi_errors.HTTPNotFound(six.text_type(ex))
 
         data['href'] = request.path
 
@@ -190,6 +190,9 @@ class Resource(object):
             LOG.exception(e)
             title = _(u'Unable to create pool')
             raise falcon.HTTPBadRequest(title, six.text_type(e))
+        except errors.PoolAlreadyExists as e:
+            LOG.exception(e)
+            raise falcon.HTTPConflict(six.text_type(e))
 
     @acl.enforce("pools:delete")
     def on_delete(self, request, response, project_id, pool):
@@ -248,9 +251,13 @@ class Resource(object):
             )
         fields = common_utils.fields(data, EXPECT,
                                      pred=lambda v: v is not None)
-
+        resp_data = None
         try:
             self._ctrl.update(pool, **fields)
+            resp_data = self._ctrl.get(pool, False)
         except errors.PoolDoesNotExist as ex:
             LOG.exception(ex)
-            raise falcon.HTTPNotFound()
+            raise wsgi_errors.HTTPNotFound(six.text_type(ex))
+
+        resp_data['href'] = request.path
+        response.body = transport_utils.to_json(resp_data)

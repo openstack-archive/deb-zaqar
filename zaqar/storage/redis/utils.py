@@ -23,7 +23,8 @@ from oslo_utils import encodeutils
 import redis
 import six
 
-from zaqar.i18n import _
+from zaqar.i18n import _LE
+from zaqar.i18n import _LW
 from zaqar.storage import errors
 
 LOG = logging.getLogger(__name__)
@@ -121,14 +122,6 @@ def descope_subscription_ids_set(subset_key):
     return (tokens[1] or None, tokens[0] or None)
 
 
-def scope_subscribers_set(queue=None, project=None,
-                          subscriber_suffix=''):
-
-    return "%s.%s.%s" % (normalize_none_str(project),
-                         normalize_none_str(queue),
-                         subscriber_suffix)
-
-
 # NOTE(prashanthr_): Aliasing the scope_message_ids_set function
 # to be used in the pools and claims controller as similar
 # functionality is required to scope redis id's.
@@ -210,13 +203,13 @@ def retries_on_connection_error(func):
                 # MasterNotFoundError.
 
                 ex = sys.exc_info()[1]
-                LOG.warning(_(u'Caught ConnectionError, retrying the '
-                              'call to {0}').format(func))
+                LOG.warning(_LW(u'Caught ConnectionError, retrying the '
+                                'call to {0}').format(func))
 
                 time.sleep(sleep_sec * (2 ** attempt))
         else:
-            LOG.error(_(u'Caught ConnectionError, maximum attempts '
-                        'to {0} exceeded.').format(func))
+            LOG.error(_LE(u'Caught ConnectionError, maximum attempts '
+                          'to {0} exceeded.').format(func))
             raise ex
 
     return wrapper
@@ -238,12 +231,6 @@ def msg_expired_filter(message, now):
     """Return True IFF the message has expired."""
 
     return message.expires <= now
-
-
-def subscription_expired_filter(subscription, now):
-    """Return True if the subscription has expired."""
-
-    return subscription.expires <= now
 
 
 class QueueListCursor(object):
@@ -280,6 +267,12 @@ class SubscriptionListCursor(object):
     def next(self):
         curr = next(self.subscription_iter)
         subscription = self.client.hmget(curr, ['s', 'u', 't', 'o'])
+        # NOTE(flwang): The expired subscription will be removed
+        # automatically, but the key can't be deleted automatically as well.
+        # Though we clean up those expired ids when create new subscription,
+        # we still need to filter them out before a new subscription creation.
+        if not subscription[0]:
+            return self.next()
         return self.denormalizer(subscription, encodeutils.safe_decode(curr))
 
     def __next__(self):

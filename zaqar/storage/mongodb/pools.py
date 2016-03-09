@@ -23,6 +23,7 @@ Schema:
 """
 
 import functools
+from pymongo import errors as mongo_error
 
 from zaqar.common import utils as common_utils
 from zaqar.storage import base
@@ -97,13 +98,16 @@ class PoolsController(base.PoolsBase):
     @utils.raises_conn_error
     def _create(self, name, weight, uri, group=None, options=None):
         options = {} if options is None else options
-        self._col.update({'n': name},
-                         {'$set': {'n': name,
-                                   'w': weight,
-                                   'u': uri,
-                                   'g': group,
-                                   'o': options}},
-                         upsert=True)
+        try:
+            self._col.update({'n': name},
+                             {'$set': {'n': name,
+                                       'w': weight,
+                                       'u': uri,
+                                       'g': group,
+                                       'o': options}},
+                             upsert=True)
+        except mongo_error.DuplicateKeyError:
+            raise errors.PoolAlreadyExists()
 
     @utils.raises_conn_error
     def _exists(self, name):
@@ -133,7 +137,7 @@ class PoolsController(base.PoolsBase):
             pool = self.get(name)
             pools_group = self.get_pools_by_group(pool['group'])
             flavor_ctl = self.driver.flavors_controller
-            res = list(flavor_ctl._list_by_pool(pool['group']))
+            res = list(flavor_ctl._list_by_pool_group(pool['group']))
 
             # NOTE(flaper87): If this is the only pool in the
             # group and it's being used by a flavor, don't allow

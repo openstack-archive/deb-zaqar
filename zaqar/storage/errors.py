@@ -149,6 +149,14 @@ class PoolDoesNotExist(DoesNotExist):
         super(PoolDoesNotExist, self).__init__(pool=pool)
 
 
+class PoolGroupDoesNotExist(DoesNotExist):
+
+    msg_format = u'Pool group {pool_group} does not exist'
+
+    def __init__(self, pool_group):
+        super(PoolGroupDoesNotExist, self).__init__(pool_group=pool_group)
+
+
 class FlavorDoesNotExist(DoesNotExist):
 
     msg_format = u'Flavor {flavor} does not exist'
@@ -191,3 +199,8 @@ class PoolCapabilitiesMismatch(ExceptionBase):
 
     msg_format = (u'The pool being added does not '
                   u'support the minimum set of capabilities')
+
+
+class PoolAlreadyExists(Conflict):
+
+    msg_format = u'The database URI is in use by another pool.'
