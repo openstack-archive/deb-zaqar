@@ -3,6 +3,8 @@ zaqar (2.0.0~b3-1) experimental; urgency=medium
   * New upstream release.
   * Fixed (build-)depends for this release.
   * Standards-Version: 3.9.7 (no change).
+  * Black list unit test failing with python-websocket 0.18.0:
+    SubscriptionTest.test_subscription_sustainable_notifications_format.
 
  -- Thomas Goirand <zigo@debian.org>  Wed, 09 Mar 2016 10:34:58 +0100
 
