@@ -1,3 +1,10 @@
+zaqar (2.0.0~b3-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 09 Mar 2016 10:34:58 +0100
+
 zaqar (2.0.0~b2-2) experimental; urgency=medium
 
   * Updated nl.po debconf translation (Closes: #812350).
