@@ -1,4 +1,4 @@
-zaqar (2.0.0~rc-1) experimental; urgency=medium
+zaqar (2.0.0~rc1-1) experimental; urgency=medium
 
   * New upstream release.
   * Fixed (build-)depends for this release.
