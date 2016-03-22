@@ -45,7 +45,7 @@ class SubscriptionController(base.Subscription):
       's': source :: six.text_type
       'u': subscriber:: six.text_type
       't': ttl:: int
-      'e': expires: int
+      'e': expires: datetime.datetime
       'o': options :: dict
       'p': project :: six.text_type
     """
@@ -137,11 +137,21 @@ class SubscriptionController(base.Subscription):
         assert fields, ('`subscriber`, `ttl`, '
                         'or `options` not found in kwargs')
 
-        res = self._collection.update({'_id': utils.to_oid(subscription_id),
-                                       'p': project},
-                                      {'$set': fields},
-                                      upsert=False)
+        new_ttl = fields.get('t', None)
+        if new_ttl is not None:
+            now = timeutils.utcnow_ts()
+            now_dt = datetime.datetime.utcfromtimestamp(now)
+            expires = now_dt + datetime.timedelta(seconds=new_ttl)
+            fields['e'] = expires
 
+        try:
+            res = self._collection.update(
+                {'_id': utils.to_oid(subscription_id),
+                 'p': project},
+                {'$set': fields},
+                upsert=False)
+        except pymongo.errors.DuplicateKeyError:
+            raise errors.SubscriptionAlreadyExists()
         if not res['updatedExisting']:
             raise errors.SubscriptionDoesNotExist(subscription_id)
 

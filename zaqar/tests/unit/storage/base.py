@@ -1051,7 +1051,8 @@ class SubscriptionControllerTest(ControllerBaseTest):
         self.subscription_controller.update(self.queue_name,
                                             s_id,
                                             project=self.project,
-                                            subscriber='http://a.com'
+                                            subscriber='http://a.com',
+                                            options={'funny': 'no'}
                                             )
 
         updated = self.subscription_controller.get(self.queue_name,
@@ -1059,6 +1060,7 @@ class SubscriptionControllerTest(ControllerBaseTest):
                                                    self.project)
 
         self.assertEqual('http://a.com', updated['subscriber'])
+        self.assertEqual({'funny': 'no'}, updated['options'])
 
         self.subscription_controller.delete(self.queue_name,
                                             s_id, project=self.project)
@@ -1092,6 +1094,47 @@ class SubscriptionControllerTest(ControllerBaseTest):
                           self.ttl,
                           self.options,
                           self.project)
+
+    def test_update_raises_if_try_to_update_to_existing_subscription(self):
+        # create two subscriptions: fake_0 and fake_1
+        ids = []
+        for s in six.moves.xrange(2):
+            subscriber = 'http://fake_{0}'.format(s)
+            s_id = self.subscription_controller.create(
+                self.source,
+                subscriber,
+                self.ttl,
+                self.options,
+                project=self.project)
+            self.addCleanup(self.subscription_controller.delete, self.source,
+                            s_id, self.project)
+            ids.append(s_id)
+        # update fake_0 to fake_2, success
+        update_fields = {
+            'subscriber': 'http://fake_2'
+        }
+        self.subscription_controller.update(self.queue_name,
+                                            ids[0],
+                                            project=self.project,
+                                            **update_fields)
+        # update fake_1 to fake_2, raise error
+        self.assertRaises(errors.SubscriptionAlreadyExists,
+                          self.subscription_controller.update,
+                          self.queue_name,
+                          ids[1],
+                          project=self.project,
+                          **update_fields)
+
+    def test_update_raises_if_subscription_does_not_exist(self):
+        update_fields = {
+            'subscriber': 'http://fake'
+        }
+        self.assertRaises(errors.SubscriptionDoesNotExist,
+                          self.subscription_controller.update,
+                          self.queue_name,
+                          'notexists',
+                          project=self.project,
+                          **update_fields)
 
 
 class PoolsControllerTest(ControllerBaseTest):

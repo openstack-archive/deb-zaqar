@@ -184,9 +184,40 @@ class SubscriptionController(base.Subscription):
         assert fields, ('`subscriber`, `ttl`, '
                         'or `options` not found in kwargs')
 
+        # Let's get our subscription by ID. If it does not exist,
+        # SubscriptionDoesNotExist error will be raised internally.
+        subscription_to_update = self.get(queue, subscription_id,
+                                          project=project)
+
+        new_subscriber = fields.get('u', None)
+
+        # Let's do some checks to prevent subscription duplication.
+        if new_subscriber:
+            # Check if 'new_subscriber' is really new for our subscription.
+            if subscription_to_update['subscriber'] != new_subscriber:
+                # It's new. We should raise error if this subscriber already
+                # exists for the queue and project.
+                if self._is_duplicated_subscriber(new_subscriber, queue,
+                                                  project):
+                    raise errors.SubscriptionAlreadyExists()
+
+        # NOTE(Eva-i): if there are new options, we need to pack them before
+        # sending to the database.
+        new_options = fields.get('o', None)
+        if new_options is not None:
+            fields['o'] = self._packer(new_options)
+
+        new_ttl = fields.get('t', None)
+        if new_ttl is not None:
+            now = timeutils.utcnow_ts()
+            expires = now + new_ttl
+            fields['e'] = expires
+
         # Pipeline ensures atomic inserts.
         with self._client.pipeline() as pipe:
             pipe.hmset(subscription_id, fields)
+            if new_ttl is not None:
+                pipe.expire(subscription_id, new_ttl)
             pipe.execute()
 
     @utils.raises_conn_error

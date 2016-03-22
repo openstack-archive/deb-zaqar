@@ -121,7 +121,8 @@ class TestValidation(base.V2Base):
         self.simulate_put(queue_1,
                           self.project_id,
                           body='{"_default_message_ttl": 60}')
-        self.addCleanup(self.simulate_delete, queue_1, headers=self.headers)
+        self.addCleanup(self.simulate_delete, queue_1, self.project_id,
+                        headers=self.headers)
         self.assertEqual(falcon.HTTP_201, self.srmock.status)
 
         # TTL under min
@@ -142,7 +143,8 @@ class TestValidation(base.V2Base):
         self.simulate_put(queue_2,
                           self.project_id,
                           body='{"_max_messages_post_size": 255}')
-        self.addCleanup(self.simulate_delete, queue_2, headers=self.headers)
+        self.addCleanup(self.simulate_delete, queue_2, self.project_id,
+                        headers=self.headers)
         self.assertEqual(falcon.HTTP_201, self.srmock.status)
 
         # Size over max
@@ -150,3 +152,30 @@ class TestValidation(base.V2Base):
                           self.project_id,
                           body='{"_max_messages_post_size": 257}')
         self.assertEqual(falcon.HTTP_400, self.srmock.status)
+
+    def test_queue_patching(self):
+        headers = {
+            'Client-ID': str(uuid.uuid4()),
+            'Content-Type': "application/openstack-messaging-v2.0-json-patch"
+        }
+
+        # Wrong JSON pointer
+        self.simulate_patch(self.queue_path,
+                            self.project_id,
+                            headers=headers,
+                            body='[{"op":"add","path":"/a","value":2}]')
+        self.assertEqual(falcon.HTTP_400, self.srmock.status)
+
+        # Wrong op
+        self.simulate_patch(self.queue_path,
+                            self.project_id,
+                            headers=headers,
+                            body='[{"op":"a","path":"/metadata/a","value":2}]')
+        self.assertEqual(falcon.HTTP_400, self.srmock.status)
+
+        self.simulate_patch(self.queue_path,
+                            self.project_id,
+                            headers=headers,
+                            body='[{"op":"add","path":"/metadata/a",'
+                            '"value":2}]')
+        self.assertEqual(falcon.HTTP_200, self.srmock.status)
