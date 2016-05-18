@@ -1,8 +1,9 @@
-zaqar (2.0.0-2) UNRELEASED; urgency=medium
+zaqar (2.0.0-2) unstable; urgency=medium
 
   * Updated Portuguese translation for debconf messages (Closes: #821246).
+  * Updated Japanese debconf templates (Closes: #820757).
 
- -- Thomas Goirand <zigo@debian.org>  Fri, 22 Apr 2016 00:00:01 +0200
+ -- Thomas Goirand <zigo@debian.org>  Wed, 18 May 2016 11:37:45 +0200
 
 zaqar (2.0.0-1) unstable; urgency=medium
 

@@ -3,24 +3,28 @@
 # This file is distributed under the same license as the zaqar package.
 # victory <victory.deb@gmail.com>, 2013.
 # 
+# Takuma Yamada <tyamada@takumayamada.com>, 2016.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: zaqar\n"
-"Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-17 09:04+0000\n"
-"PO-Revision-Date: 2013-09-02 14:02+0900\n"
-"Last-Translator: victory <victory.deb@gmail.com>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-06 14:41+0000\n"
+"PO-Revision-Date: 2016-04-12 09:46+0900\n"
+"Last-Translator: Takuma Yamada <tyamada@takumayamada.com>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
 msgid "Register Zaqar in the Keystone endpoint catalog?"
-msgstr "Zaqar を Keystone の端末リストに登録しますか?"
+msgstr "Zaqar を Keystone のエンドポイントカタログに登録しますか?"
 
 #. Type: boolean
 #. Description
@@ -30,19 +34,24 @@ msgid ""
 "accessible. This is done using \"keystone service-create\" and \"keystone "
 "endpoint-create\". This can be done automatically now."
 msgstr ""
-"OpenStack のサービスごと (API ごと) に、アクセスできるようにするため登録すべ"
-"きです。「keystone service-create」と「keystone endpoint-create」を使って登録"
-"することができます。ここで自動的に行うことができます。"
+"各 OpenStack サービス (各 API) は、アクセス可能にするために登録する必要があり"
+"ます。\"keystone service-create\" と \"keystone endpoint-create\" を使って登"
+"録することができます。ここで自動的に行うことができます。"
 
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
+#| msgid ""
+#| "Note that you will need to have an up and running Keystone server on "
+#| "which to connect using the Keystone authentication token."
 msgid ""
 "Note that you will need to have an up and running Keystone server on which "
-"to connect using the Keystone authentication token."
+"to connect using a known admin project name, admin username and password. "
+"The admin auth token is not used anymore."
 msgstr ""
-"Keystone 認証文字列を使って接続する先の Keystone サーバが必要なことに注意して"
-"ください。"
+"既知の管理プロジェクト名、管理者のユーザ名とパスワードを使用して接続するに"
+"は、Keystone サーバの起動および実行が必要になりますので注意してください。管理"
+"者認証トークンはもう使用されていません。"
 
 #. Type: string
 #. Description
@@ -58,64 +67,85 @@ msgid ""
 "contact Keystone to do the Zaqar service and endpoint creation."
 msgstr ""
 "Keystone サーバの IP アドレスを入力してください。それにより zaqar-server は "
-"Keystone と通信し、Zaqar サービスや端末の作成ができるようになります。"
-
-#. Type: password
-#. Description
-#: ../zaqar-server.templates:4001
-msgid "Keystone authentication token:"
-msgstr "Keystone 認証文字列:"
-
-#. Type: password
-#. Description
-#: ../zaqar-server.templates:4001
-msgid ""
-"To configure its endpoint in Keystone, zaqar-server needs the Keystone "
-"authentication token."
-msgstr ""
-"Keystone で端末を設定するには、zaqar-server は Keystone 認証文字列を必要としま"
+"Keystone と通信し、Zaqar サービスやエンドポイントの作成ができるようになりま"
 "す。"
 
 #. Type: string
 #. Description
+#: ../zaqar-server.templates:4001
+#| msgid "Keystone authentication token:"
+msgid "Keystone admin name:"
+msgstr "Keystone 管理者名:"
+
+#. Type: string
+#. Description
+#. Type: string
+#. Description
+#. Type: password
+#. Description
+#: ../zaqar-server.templates:4001 ../zaqar-server.templates:5001
+#: ../zaqar-server.templates:6001
+msgid ""
+"To register the service endpoint, this package needs to know the Admin "
+"login, name, project name, and password to the Keystone server."
+msgstr ""
+"サービスのエンドポイントを登録するには、このパッケージが Keystone サーバへの"
+"管理者ログイン、名前、プロジェクト名、およびパスワードを知っている必要があり"
+"ます。"
+
+#. Type: string
+#. Description
 #: ../zaqar-server.templates:5001
+msgid "Keystone admin project name:"
+msgstr "Keystone 管理プロジェクト名:"
+
+#. Type: password
+#. Description
+#: ../zaqar-server.templates:6001
+msgid "Keystone admin password:"
+msgstr "Keystone 管理者パスワード:"
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:7001
 msgid "Zaqar endpoint IP address:"
-msgstr "Zaqar 端末の IP アドレス:"
+msgstr "Zaqar エンドポイントの IP アドレス:"
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:5001
+#: ../zaqar-server.templates:7001
 msgid "Please enter the IP address that will be used to contact Zaqar."
-msgstr "Zaqar への通信に利用する IP アドレスを入力してください。"
+msgstr "Zaqar への通信に使用される IP アドレスを入力してください。"
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:5001
+#: ../zaqar-server.templates:7001
 msgid ""
 "This IP address should be accessible from the clients that will use this "
 "service, so if you are installing a public cloud, this should be a public IP "
 "address."
 msgstr ""
-"この IP アドレスはこのサービスを利用するクライアントからアクセスできないとい"
-"けないので、パブリッククラウドをインストールしている場合、これは公開 IP アド"
-"レスを使うようにしてください。"
+"この IP アドレスは、このサービスを利用するクライアントからアクセス可能でなけ"
+"ればなりません。パブリッククラウドをインストールしている場合は、パブリック "
+"IP アドレスにする必要があります。"
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:6001
+#: ../zaqar-server.templates:8001
 msgid "Name of the region to register:"
-msgstr "登録する領域の名前:"
+msgstr "登録するリージョンの名前:"
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:6001
+#: ../zaqar-server.templates:8001
 msgid ""
 "OpenStack supports using availability zones, with each region representing a "
 "location. Please enter the zone that you wish to use when registering the "
 "endpoint."
 msgstr ""
-"OpenStack は位置を示す各領域による利用可能区分を利用することができます。端末"
-"の登録時に利用したい区分を入力してください。"
+"OpenStack は、場所を示すリージョン毎に、アベイラビリティーゾーンの使用をサ"
+"ポートします。エンドポイントを登録する際に、使用するゾーンを入力してくださ"
+"い。"
 
 #. Type: string
 #. Description
@@ -145,7 +175,7 @@ msgstr ""
 #. locataire ("tenant")
 #: ../zaqar-common.templates:3001
 msgid "Authentication server tenant name:"
-msgstr "認証サーバの管理用アカウント (tenant) 名"
+msgstr "認証サーバのテナント (tenant) 名:"
 
 #. Type: string
 #. Description
@@ -158,7 +188,7 @@ msgstr "認証サーバの管理用アカウント (tenant) 名"
 #. locataire ("tenant")
 #: ../zaqar-common.templates:3001
 msgid "Please specify the authentication server tenant name."
-msgstr "認証サーバの管理用アカウント (tenant) 名を指定してください。"
+msgstr "認証サーバのテナント (tenant) 名を指定してください。"
 
 #. Type: string
 #. Description
@@ -183,6 +213,13 @@ msgstr "認証サーバのパスワード:"
 #: ../zaqar-common.templates:5001
 msgid "Please specify the password to use with the authentication server."
 msgstr "認証サーバで利用するパスワードを指定してください。"
+
+#~ msgid ""
+#~ "To configure its endpoint in Keystone, zaqar-server needs the Keystone "
+#~ "authentication token."
+#~ msgstr ""
+#~ "Keystone で端末を設定するには、zaqar-server は Keystone 認証文字列を必要と"
+#~ "します。"
 
 #~ msgid "Set up a database for Zaqar?"
 #~ msgstr "Zaqar 用のデータベースを用意しますか?"
