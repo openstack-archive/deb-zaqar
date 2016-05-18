@@ -2,6 +2,7 @@ zaqar (2.0.0-2) unstable; urgency=medium
 
   * Updated Portuguese translation for debconf messages (Closes: #821246).
   * Updated Japanese debconf templates (Closes: #820757).
+  * Updated Dutch debconf templates (Closes: #823441).
 
  -- Thomas Goirand <zigo@debian.org>  Wed, 18 May 2016 11:37:45 +0200
 
