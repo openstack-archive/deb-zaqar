@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from distutils.version import LooseVersion
 from wsgiref import simple_server
 
 import falcon
+import netaddr
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
+import socket
 
 from zaqar.common import decorators
 from zaqar.common.transport.wsgi import helpers
@@ -47,6 +50,15 @@ LOG = logging.getLogger(__name__)
 
 def _config_options():
     return [(_WSGI_GROUP, _WSGI_OPTIONS)]
+
+
+class FuncMiddleware(object):
+
+    def __init__(self, func):
+        self.func = func
+
+    def process_resource(self, req, resp, resource, params):
+        return self.func(req, resp, params)
 
 
 class Driver(transport.DriverBase):
@@ -105,7 +117,16 @@ class Driver(transport.DriverBase):
                 ('/v2', v2_0.private_endpoints(self, self._conf)),
             ])
 
-        self.app = falcon.API(before=self.before_hooks)
+        # NOTE(wanghao): Since hook feature has removed after 1.0.0, using
+        # middleware instead of it, but for the compatibility with old version,
+        # we support them both now. Hook way can be removed after falcon
+        # version must be bigger than 1.0.0 in requirements.
+        if LooseVersion(falcon.__version__) >= LooseVersion("1.0.0"):
+            middleware = [FuncMiddleware(hook) for hook in self.before_hooks]
+            self.app = falcon.API(middleware=middleware)
+        else:
+            self.app = falcon.API(before=self.before_hooks)
+
         self.app.add_error_handler(Exception, self._error_handler)
 
         for version_path, endpoints in catalog:
@@ -133,14 +154,27 @@ class Driver(transport.DriverBase):
         raise falcon.HTTPInternalServerError('Internal server error',
                                              six.text_type(exc))
 
+    def _get_server_cls(self, host):
+        """Return an appropriate WSGI server class base on provided host
+
+        :param host: The listen host for the zaqar API server.
+        """
+        server_cls = simple_server.WSGIServer
+        if netaddr.valid_ipv6(host):
+            if getattr(server_cls, 'address_family') == socket.AF_INET:
+                class server_cls(server_cls):
+                    address_family = socket.AF_INET6
+        return server_cls
+
     def listen(self):
         """Self-host using 'bind' and 'port' from the WSGI config group."""
 
         msgtmpl = _(u'Serving on host %(bind)s:%(port)s')
         LOG.info(msgtmpl,
                  {'bind': self._wsgi_conf.bind, 'port': self._wsgi_conf.port})
-
+        server_cls = self._get_server_cls(self._wsgi_conf.bind)
         httpd = simple_server.make_server(self._wsgi_conf.bind,
                                           self._wsgi_conf.port,
-                                          self.app)
+                                          self.app,
+                                          server_cls)
         httpd.serve_forever()

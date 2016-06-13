@@ -25,6 +25,9 @@ class ZaqarTempestPlugin(plugins.TempestPlugin):
     def load_tests(self):
         base_path = os.path.split(os.path.dirname(
             os.path.abspath(__file__)))[0]
+        # Note: base_path should be set to the top directory
+        # of zaqar.
+        base_path += '/../..'
         test_dir = "zaqar/tests/tempest_plugin/tests"
         full_test_dir = os.path.join(base_path, test_dir)
         return full_test_dir, base_path
@@ -32,8 +35,8 @@ class ZaqarTempestPlugin(plugins.TempestPlugin):
     def register_opts(self, conf):
         conf.register_group(zaqar_config.messaging_group)
         conf.register_opts(zaqar_config.MessagingGroup, group='messaging')
-        conf.register_opts(zaqar_config.service_option,
-                           group='service_available')
+        conf.register_opt(zaqar_config.service_option,
+                          group='service_available')
 
     def get_opt_lists(self):
         return [('messaging', zaqar_config.MessagingGroup),
