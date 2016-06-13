@@ -1,3 +1,9 @@
+zaqar (3.0.0~b1-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 13 Jun 2016 16:52:37 +0200
+
 zaqar (2.0.0-2) unstable; urgency=medium
 
   * Updated Portuguese translation for debconf messages (Closes: #821246).
