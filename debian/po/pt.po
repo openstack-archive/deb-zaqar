@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: zaqar 2.0.0-1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-08 14:43+0000\n"
+"Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
+"POT-Creation-Date: 2016-06-13 15:01+0000\n"
 "PO-Revision-Date: 2016-04-17 00:12+0100\n"
 "Last-Translator: Américo Monteiro <a_monteiro@gmx.com>\n"
 "Language-Team: Portuguese <traduz@debianpt.org>\n"
@@ -39,9 +39,6 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
-#| msgid ""
-#| "Note that you will need to have an up and running Keystone server on "
-#| "which to connect using the Keystone authentication token."
 msgid ""
 "Note that you will need to have an up and running Keystone server on which "
 "to connect using a known admin project name, admin username and password. "
@@ -71,7 +68,6 @@ msgstr ""
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:4001
-#| msgid "Keystone authentication token:"
 msgid "Keystone admin name:"
 msgstr "Nome de administrador do Keystone:"
 

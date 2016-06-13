@@ -28,7 +28,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: zaqar\n"
 "Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-17 09:04+0000\n"
+"POT-Creation-Date: 2016-06-13 15:01+0000\n"
 "PO-Revision-Date: 2013-12-08 21:31-0300\n"
 "Last-Translator: Matías Bellone <matiasbellone+debian@gmail.com>\n"
 "Language-Team: Debian l10n Spanish <debian-l10n-spanish@lists.debian.org>\n"
@@ -58,9 +58,14 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
+#, fuzzy
+#| msgid ""
+#| "Note that you will need to have an up and running Keystone server on "
+#| "which to connect using the Keystone authentication token."
 msgid ""
 "Note that you will need to have an up and running Keystone server on which "
-"to connect using the Keystone authentication token."
+"to connect using a known admin project name, admin username and password. "
+"The admin auth token is not used anymore."
 msgstr ""
 "Tenga en cuenta que necesitará disponer de un servidor Keystone en ejecución "
 "al que conectarse utilizando el token de autenticación de Keystone."
@@ -82,37 +87,54 @@ msgstr ""
 "contactar con Keystone para realizar el servicio Zaqar y crear el punto "
 "final."
 
-#. Type: password
+#. Type: string
 #. Description
 #: ../zaqar-server.templates:4001
-msgid "Keystone authentication token:"
+#, fuzzy
+#| msgid "Keystone authentication token:"
+msgid "Keystone admin name:"
 msgstr "Token de autenticación de Keystone:"
 
+#. Type: string
+#. Description
+#. Type: string
+#. Description
 #. Type: password
 #. Description
-#: ../zaqar-server.templates:4001
+#: ../zaqar-server.templates:4001 ../zaqar-server.templates:5001
+#: ../zaqar-server.templates:6001
 msgid ""
-"To configure its endpoint in Keystone, zaqar-server needs the Keystone "
-"authentication token."
+"To register the service endpoint, this package needs to know the Admin "
+"login, name, project name, and password to the Keystone server."
 msgstr ""
-"Para configurar su punto final en Keystone, zaqar-server necesita el token de "
-"autenticación de Keystone."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
+msgid "Keystone admin project name:"
+msgstr ""
+
+#. Type: password
+#. Description
+#: ../zaqar-server.templates:6001
+msgid "Keystone admin password:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../zaqar-server.templates:7001
 msgid "Zaqar endpoint IP address:"
 msgstr "Dirección IP del punto final de Zaqar:"
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:5001
+#: ../zaqar-server.templates:7001
 msgid "Please enter the IP address that will be used to contact Zaqar."
 msgstr "Introduzca la dirección IP que se utilizará para contactar con Zaqar."
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:5001
+#: ../zaqar-server.templates:7001
 msgid ""
 "This IP address should be accessible from the clients that will use this "
 "service, so if you are installing a public cloud, this should be a public IP "
@@ -124,13 +146,13 @@ msgstr ""
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:6001
+#: ../zaqar-server.templates:8001
 msgid "Name of the region to register:"
 msgstr "Nombre de la región a registrar:"
 
 #. Type: string
 #. Description
-#: ../zaqar-server.templates:6001
+#: ../zaqar-server.templates:8001
 msgid ""
 "OpenStack supports using availability zones, with each region representing a "
 "location. Please enter the zone that you wish to use when registering the "
@@ -208,3 +230,10 @@ msgstr "Contraseña del servidor de autenticación:"
 #: ../zaqar-common.templates:5001
 msgid "Please specify the password to use with the authentication server."
 msgstr "Indique la contraseña para usar con el servidor de autenticación."
+
+#~ msgid ""
+#~ "To configure its endpoint in Keystone, zaqar-server needs the Keystone "
+#~ "authentication token."
+#~ msgstr ""
+#~ "Para configurar su punto final en Keystone, zaqar-server necesita el "
+#~ "token de autenticación de Keystone."

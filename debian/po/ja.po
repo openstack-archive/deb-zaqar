@@ -2,14 +2,14 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the zaqar package.
 # victory <victory.deb@gmail.com>, 2013.
-# 
+#
 # Takuma Yamada <tyamada@takumayamada.com>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: zaqar\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-06 14:41+0000\n"
+"Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
+"POT-Creation-Date: 2016-06-13 15:01+0000\n"
 "PO-Revision-Date: 2016-04-12 09:46+0900\n"
 "Last-Translator: Takuma Yamada <tyamada@takumayamada.com>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
@@ -41,9 +41,6 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
-#| msgid ""
-#| "Note that you will need to have an up and running Keystone server on "
-#| "which to connect using the Keystone authentication token."
 msgid ""
 "Note that you will need to have an up and running Keystone server on which "
 "to connect using a known admin project name, admin username and password. "
@@ -73,7 +70,6 @@ msgstr ""
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:4001
-#| msgid "Keystone authentication token:"
 msgid "Keystone admin name:"
 msgstr "Keystone 管理者名:"
 
