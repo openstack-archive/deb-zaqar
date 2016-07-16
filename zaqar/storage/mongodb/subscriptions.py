@@ -53,7 +53,6 @@ class SubscriptionController(base.Subscription):
     def __init__(self, *args, **kwargs):
         super(SubscriptionController, self).__init__(*args, **kwargs)
         self._collection = self.driver.subscriptions_database.subscriptions
-        self._queue_ctrl = self.driver.queue_controller
         self._collection.ensure_index(SUBSCRIPTIONS_INDEX, unique=True)
         # NOTE(flwang): MongoDB will automatically delete the subscription
         # from the subscriptions collection when the subscription's 'e' value
@@ -77,17 +76,12 @@ class SubscriptionController(base.Subscription):
         cursor = cursor.limit(limit).sort('_id')
         marker_name = {}
 
+        now = timeutils.utcnow_ts()
+
         def normalizer(record):
-            ret = {
-                'id': str(record['_id']),
-                'source': record['s'],
-                'subscriber': record['u'],
-                'ttl': record['t'],
-                'options': record['o'],
-            }
             marker_name['next'] = record['_id']
 
-            return ret
+            return _basic_subscription(record, now)
 
         yield utils.HookedCursor(cursor, normalizer)
         yield marker_name and marker_name['next']
@@ -100,7 +94,8 @@ class SubscriptionController(base.Subscription):
         if not res:
             raise errors.SubscriptionDoesNotExist(subscription_id)
 
-        return _normalize(res)
+        now = timeutils.utcnow_ts()
+        return _basic_subscription(res, now)
 
     @utils.raises_conn_error
     def create(self, queue, subscriber, ttl, options, project=None):
@@ -109,8 +104,6 @@ class SubscriptionController(base.Subscription):
         now_dt = datetime.datetime.utcfromtimestamp(now)
         expires = now_dt + datetime.timedelta(seconds=ttl)
 
-        if not self._queue_ctrl.exists(source, project):
-            raise errors.QueueDoesNotExist(source, project)
         try:
             subscription_id = self._collection.insert({'s': source,
                                                        'u': subscriber,
@@ -161,13 +154,18 @@ class SubscriptionController(base.Subscription):
                                  'p': project}, w=0)
 
 
-def _normalize(record):
-    ret = {
-        'id': str(record['_id']),
+def _basic_subscription(record, now):
+    # NOTE(Eva-i): unused here record's field 'e' (expires) has changed it's
+    # format from int (timestamp) to datetime since patch
+    # 1d122b1671792aff0055ed5396111cd441fb8269. Any future change about
+    # starting using 'e' field should make sure support both of the formats.
+    oid = record['_id']
+    age = now - utils.oid_ts(oid)
+    return {
+        'id': str(oid),
         'source': record['s'],
         'subscriber': record['u'],
         'ttl': record['t'],
+        'age': int(age),
         'options': record['o']
     }
-
-    return ret

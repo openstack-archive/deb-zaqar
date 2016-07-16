@@ -87,7 +87,7 @@ function configure_zaqar {
     iniset $ZAQAR_CONF signed_url secret_key notreallysecret
 
     if is_service_enabled key; then
-	iniset $ZAQAR_CONF DEFAULT auth_strategy keystone
+        iniset $ZAQAR_CONF DEFAULT auth_strategy keystone
     fi
 
     iniset $ZAQAR_CONF storage message_pipeline zaqar.notification.notifier
@@ -99,6 +99,12 @@ function configure_zaqar {
     iniset $ZAQAR_CONF drivers transport websocket
 
     configure_auth_token_middleware $ZAQAR_CONF zaqar $ZAQAR_AUTH_CACHE_DIR
+
+    iniset $ZAQAR_CONF trustee auth_plugin password
+    iniset $ZAQAR_CONF trustee auth_url $KEYSTONE_AUTH_URI
+    iniset $ZAQAR_CONF trustee username $ZAQAR_TRUSTEE_USER
+    iniset $ZAQAR_CONF trustee password $ZAQAR_TRUSTEE_PASSWORD
+    iniset $ZAQAR_CONF trustee user_domain_id $ZAQAR_TRUSTEE_DOMAIN
 
     iniset $ZAQAR_CONF DEFAULT pooling True
     iniset $ZAQAR_CONF 'pooling:catalog' enable_virtual_pool True
@@ -160,7 +166,7 @@ function configure_redis {
 
 function configure_mongodb {
     # Set nssize to 2GB. This increases the number of namespaces supported
-    # # per database.
+    # per database.
     pip_install pymongo
     if is_ubuntu; then
         install_package mongodb-server
@@ -192,7 +198,7 @@ function install_zaqar {
 # install_zaqarclient() - Collect source and prepare
 function install_zaqarclient {
     git_clone $ZAQARCLIENT_REPO $ZAQARCLIENT_DIR $ZAQARCLIENT_BRANCH
-    # NOTE(flaper87): Ideally, this should be develop but apparently
+    # NOTE(flaper87): Ideally, this should be developed, but apparently
     # there's a bug in devstack that skips test-requirements when using
     # setup_develop
     setup_install $ZAQARCLIENT_DIR

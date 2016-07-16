@@ -19,7 +19,6 @@ import msgpack
 from oslo_utils import timeutils
 import redis
 
-from zaqar.common import decorators
 from zaqar.common import utils as common_utils
 from zaqar.storage import base
 from zaqar.storage import errors
@@ -53,10 +52,6 @@ class SubscriptionController(base.Subscription):
                                       use_bin_type=True).pack
         self._unpacker = functools.partial(msgpack.unpackb, encoding='utf-8')
 
-    @decorators.lazy_property(write=False)
-    def _queue_ctrl(self):
-        return self.driver.queue_controller
-
     @utils.raises_conn_error
     @utils.retries_on_connection_error
     def list(self, queue, project=None, marker=None, limit=10):
@@ -65,19 +60,24 @@ class SubscriptionController(base.Subscription):
                                                       project,
                                                       SUBSCRIPTION_IDS_SUFFIX)
         rank = client.zrank(subset_key, marker)
-        start = rank + 1 if rank else 0
+        start = rank + 1 if rank is not None else 0
 
         cursor = (q for q in client.zrange(subset_key, start,
                                            start + limit - 1))
         marker_next = {}
 
         def denormalizer(record, sid):
+            now = timeutils.utcnow_ts()
+            ttl = int(record[2])
+            expires = int(record[3])
+            created = expires - ttl
             ret = {
                 'id': sid,
                 'source': record[0],
                 'subscriber': record[1],
-                'ttl': int(record[2]),
-                'options': self._unpacker(record[3]),
+                'ttl': ttl,
+                'age': now - created,
+                'options': self._unpacker(record[4]),
             }
             marker_next['next'] = sid
 
@@ -89,11 +89,11 @@ class SubscriptionController(base.Subscription):
     @utils.raises_conn_error
     @utils.retries_on_connection_error
     def get(self, queue, subscription_id, project=None):
-
         subscription = SubscriptionEnvelope.from_redis(subscription_id,
                                                        self._client)
         if subscription:
-            return subscription.to_basic()
+            now = timeutils.utcnow_ts()
+            return subscription.to_basic(now)
         else:
             raise errors.SubscriptionDoesNotExist(subscription_id)
 
@@ -117,8 +117,6 @@ class SubscriptionController(base.Subscription):
                         'o': self._packer(options),
                         'p': project}
 
-        if not self._queue_ctrl.exists(queue, project):
-            raise errors.QueueDoesNotExist(queue, project)
         try:
             # Pipeline ensures atomic inserts.
             with self._client.pipeline() as pipe:

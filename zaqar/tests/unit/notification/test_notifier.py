@@ -54,13 +54,16 @@ class NotifierTest(testing.TestBase):
 
     def test_webhook(self):
         subscription = [{'subscriber': 'http://trigger_me',
-                         'source': 'fake_queue'},
+                         'source': 'fake_queue',
+                         'options': {}},
                         {'subscriber': 'http://call_me',
-                         'source': 'fake_queue'},
+                         'source': 'fake_queue',
+                         'options': {}},
                         {'subscriber': 'http://ping_me',
-                         'source': 'fake_queue'}]
+                         'source': 'fake_queue',
+                         'options': {}}]
         ctlr = mock.MagicMock()
-        ctlr.list = mock.Mock(return_value=iter([subscription]))
+        ctlr.list = mock.Mock(return_value=iter([subscription, {}]))
         driver = notifier.NotifierDriver(subscription_controller=ctlr)
         headers = {'Content-Type': 'application/json'}
         with mock.patch('requests.post') as mock_post:
@@ -98,18 +101,91 @@ class NotifierTest(testing.TestBase):
                 ], any_order=True)
             self.assertEqual(6, len(mock_post.mock_calls))
 
+    def test_webhook_post_data(self):
+        post_data = {'foo': 'bar', 'egg': '$zaqar_message$'}
+        subscription = [{'subscriber': 'http://trigger_me',
+                         'source': 'fake_queue',
+                         'options': {'post_data': json.dumps(post_data)}}]
+        ctlr = mock.MagicMock()
+        ctlr.list = mock.Mock(return_value=iter([subscription, {}]))
+        driver = notifier.NotifierDriver(subscription_controller=ctlr)
+        headers = {'Content-Type': 'application/json'}
+        with mock.patch('requests.post') as mock_post:
+            driver.post('fake_queue', self.messages, self.client_id,
+                        self.project)
+            driver.executor.shutdown()
+            # Let's deserialize "data" from JSON string to dict in each mock
+            # call, so we can do dict comparisons. JSON string comparisons
+            # often fail, because dict keys can be serialized in different
+            # order inside the string.
+            for call in mock_post.call_args_list:
+                call[1]['data'] = json.loads(call[1]['data'])
+            # These are not real calls. In real calls each "data" argument is
+            # serialized by json.dumps. But we made a substitution before,
+            # so it will work.
+            mock_post.assert_has_calls([
+                mock.call(subscription[0]['subscriber'],
+                          data={'foo': 'bar', 'egg': self.notifications[0]},
+                          headers=headers),
+                mock.call(subscription[0]['subscriber'],
+                          data={'foo': 'bar', 'egg': self.notifications[1]},
+                          headers=headers),
+                ], any_order=True)
+            self.assertEqual(2, len(mock_post.mock_calls))
+
+    def test_marker(self):
+        subscription1 = [{'subscriber': 'http://trigger_me1',
+                          'source': 'fake_queue',
+                          'options': {}}]
+        subscription2 = [{'subscriber': 'http://trigger_me2',
+                          'source': 'fake_queue',
+                          'options': {}}]
+        ctlr = mock.MagicMock()
+
+        def mock_list(queue, project, marker):
+            if not marker:
+                return iter([subscription1, 'marker_id'])
+            else:
+                return iter([subscription2, {}])
+
+        ctlr.list = mock_list
+        driver = notifier.NotifierDriver(subscription_controller=ctlr)
+        headers = {'Content-Type': 'application/json'}
+        with mock.patch('requests.post') as mock_post:
+            driver.post('fake_queue', self.messages, self.client_id,
+                        self.project)
+            driver.executor.shutdown()
+            # Let's deserialize "data" from JSON string to dict in each mock
+            # call, so we can do dict comparisons. JSON string comparisons
+            # often fail, because dict keys can be serialized in different
+            # order inside the string.
+            for call in mock_post.call_args_list:
+                call[1]['data'] = json.loads(call[1]['data'])
+            # These are not real calls. In real calls each "data" argument is
+            # serialized by json.dumps. But we made a substitution before,
+            # so it will work.
+            mock_post.assert_has_calls([
+                mock.call(subscription1[0]['subscriber'],
+                          data=self.notifications[0],
+                          headers=headers),
+                mock.call(subscription2[0]['subscriber'],
+                          data=self.notifications[0],
+                          headers=headers),
+                ], any_order=True)
+            self.assertEqual(4, len(mock_post.mock_calls))
+
     @mock.patch('subprocess.Popen')
     def test_mailto(self, mock_popen):
         subscription = [{'subscriber': 'mailto:aaa@example.com',
                          'source': 'fake_queue',
-                        'options': {'subject': 'Hello',
-                                    'from': 'zaqar@example.com'}},
+                         'options': {'subject': 'Hello',
+                                     'from': 'zaqar@example.com'}},
                         {'subscriber': 'mailto:bbb@example.com',
                          'source': 'fake_queue',
-                        'options': {'subject': 'Hello',
-                                    'from': 'zaqar@example.com'}}]
+                         'options': {'subject': 'Hello',
+                                     'from': 'zaqar@example.com'}}]
         ctlr = mock.MagicMock()
-        ctlr.list = mock.Mock(return_value=iter([subscription]))
+        ctlr.list = mock.Mock(return_value=iter([subscription, {}]))
         driver = notifier.NotifierDriver(subscription_controller=ctlr)
         called = set()
         msg = ('Content-Type: text/plain; charset="us-ascii"\n'
@@ -159,7 +235,7 @@ class NotifierTest(testing.TestBase):
 
     def test_post_no_subscriber(self):
         ctlr = mock.MagicMock()
-        ctlr.list = mock.Mock(return_value=iter([[]]))
+        ctlr.list = mock.Mock(return_value=iter([[], {}]))
         driver = notifier.NotifierDriver(subscription_controller=ctlr)
         with mock.patch('requests.post') as mock_post:
             driver.post('fake_queue', self.messages, self.client_id,
@@ -169,9 +245,10 @@ class NotifierTest(testing.TestBase):
 
     def test_proper_notification_data(self):
         subscription = [{'subscriber': 'http://trigger_me',
-                         'source': 'fake_queue'}]
+                         'source': 'fake_queue',
+                         'options': {}}]
         ctlr = mock.MagicMock()
-        ctlr.list = mock.Mock(return_value=iter([subscription]))
+        ctlr.list = mock.Mock(return_value=iter([subscription, {}]))
         driver = notifier.NotifierDriver(subscription_controller=ctlr)
         with mock.patch('requests.post') as mock_post:
             driver.post('fake_queue', self.messages, self.client_id,

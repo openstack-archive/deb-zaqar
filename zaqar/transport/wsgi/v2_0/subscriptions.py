@@ -15,7 +15,9 @@
 
 import falcon
 from oslo_log import log as logging
+from oslo_utils import netutils
 import six
+from stevedore import driver
 
 from zaqar.common import decorators
 from zaqar.i18n import _
@@ -109,13 +111,14 @@ class ItemResource(object):
 class CollectionResource(object):
 
     __slots__ = ('_subscription_controller', '_validate',
-                 '_default_subscription_ttl')
+                 '_default_subscription_ttl', '_queue_controller')
 
     def __init__(self, validate, subscription_controller,
-                 default_subscription_ttl):
+                 default_subscription_ttl, queue_controller):
         self._subscription_controller = subscription_controller
         self._validate = validate
         self._default_subscription_ttl = default_subscription_ttl
+        self._queue_controller = queue_controller
 
     @decorators.TransportLog("Subscription collection")
     @acl.enforce("subscription:get_all")
@@ -171,19 +174,25 @@ class CollectionResource(object):
             document = {}
 
         try:
+            if not self._queue_controller.exists(queue_name, project_id):
+                self._queue_controller.create(queue_name, project=project_id)
             self._validate.subscription_posting(document)
             subscriber = document['subscriber']
-            ttl = document.get('ttl', self._default_subscription_ttl)
             options = document.get('options', {})
+            url = netutils.urlsplit(subscriber)
+            ttl = document.get('ttl', self._default_subscription_ttl)
+            mgr = driver.DriverManager('zaqar.notification.tasks', url.scheme,
+                                       invoke_on_load=True)
+            req_data = req.headers.copy()
+            req_data.update(req.env)
+            mgr.driver.register(subscriber, options, ttl, project_id, req_data)
+
             created = self._subscription_controller.create(queue_name,
                                                            subscriber,
                                                            ttl,
                                                            options,
                                                            project=project_id)
 
-        except storage_errors.QueueDoesNotExist as ex:
-            LOG.exception(ex)
-            raise wsgi_errors.HTTPBadRequestAPI(six.text_type(ex))
         except validation.ValidationFailed as ex:
             LOG.debug(ex)
             raise wsgi_errors.HTTPBadRequestAPI(six.text_type(ex))

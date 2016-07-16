@@ -32,23 +32,30 @@ class NotifierDriver(object):
 
     def __init__(self, *args, **kwargs):
         self.subscription_controller = kwargs.get('subscription_controller')
-        # TODO(flwang): Make the max_workers configurable
-        self.executor = futurist.ThreadPoolExecutor(max_workers=10)
+        max_workers = kwargs.get('max_notifier_workers', 10)
+        self.executor = futurist.ThreadPoolExecutor(max_workers=max_workers)
 
     def post(self, queue_name, messages, client_uuid, project=None):
         """Send messages to the subscribers."""
         if self.subscription_controller:
             if not isinstance(self.subscription_controller,
                               pooling.SubscriptionController):
-                subscribers = self.subscription_controller.list(queue_name,
-                                                                project)
-                for sub in next(subscribers):
-                    s_type = urllib_parse.urlparse(sub['subscriber']).scheme
-                    data_driver = self.subscription_controller.driver
-                    mgr = driver.DriverManager('zaqar.notification.tasks',
-                                               s_type,
-                                               invoke_on_load=True)
-                    self.executor.submit(mgr.driver.execute, sub, messages,
-                                         conf=data_driver.conf)
+                marker = None
+                while True:
+                    subscribers = self.subscription_controller.list(
+                        queue_name, project, marker=marker)
+                    for sub in next(subscribers):
+                        LOG.debug("Notifying subscriber %r" % (sub,))
+                        s_type = urllib_parse.urlparse(
+                            sub['subscriber']).scheme
+                        data_driver = self.subscription_controller.driver
+                        mgr = driver.DriverManager('zaqar.notification.tasks',
+                                                   s_type,
+                                                   invoke_on_load=True)
+                        self.executor.submit(mgr.driver.execute, sub, messages,
+                                             conf=data_driver.conf)
+                    marker = next(subscribers)
+                    if not marker:
+                        break
         else:
             LOG.error(_LE('Failed to get subscription controller.'))

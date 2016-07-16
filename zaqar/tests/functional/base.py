@@ -95,15 +95,10 @@ class FunctionalTestBase(testing.TestBase):
             self.__class__.class_ttl_gc_interval = 60
 
         if _TEST_INTEGRATION:
-            # TODO(kgriffs): This code should be replaced to use
-            # an external wsgi server instance.
-
-            # NOTE(flaper87): Use running instances.
-            if self.cfg.zaqar.run_server:
-                if not (self.server and self.server.is_alive()):
-                    self.server = self.server_class()
-                    self.server.start(self.mconf)
-                    self.addCleanup(self.server.process.terminate)
+            if not (self.server and self.server.is_alive()):
+                self.server = self.server_class()
+                self.server.start(self.mconf)
+                self.addCleanup(self.server.process.terminate)
 
             self.client = http.Client()
         else:
@@ -116,10 +111,6 @@ class FunctionalTestBase(testing.TestBase):
             self.client = http.WSGIClient(self.class_bootstrap.transport.app)
 
         self.headers = helpers.create_zaqar_headers(self.cfg)
-
-        if self.cfg.auth.auth_on:
-            auth_token = helpers.get_keystone_token(self.cfg, self.client)
-            self.headers["X-Auth-Token"] = auth_token
 
         self.headers_response_with_body = {'location', 'content-type'}
 
@@ -239,7 +230,7 @@ class FunctionalTestBase(testing.TestBase):
         """
         msg = ('More Messages returned than allowed: expected count = {0}'
                ', actual count = {1}'.format(expectedCount, actualCount))
-        self.assertTrue(actualCount <= expectedCount, msg)
+        self.assertLessEqual(actualCount, expectedCount, msg)
 
     def assertQueueStats(self, result_json, claimed):
         """Checks the Queue Stats results
@@ -289,8 +280,9 @@ class FunctionalTestBase(testing.TestBase):
 
         # Verify that age has valid values
         age = message['age']
-        self.assertTrue(0 <= age <= self.limits.max_message_ttl,
-                        msg='Invalid Age {0}'.format(age))
+        msg = 'Invalid Age {0}'.format(age)
+        self.assertLessEqual(0, age, msg)
+        self.assertLessEqual(age, self.limits.max_message_ttl, msg)
 
         # Verify that GET on href returns 200
         path = message['href']
@@ -312,7 +304,8 @@ class FunctionalTestBase(testing.TestBase):
 
         msg = ('Invalid Time Delta {0}, Created time {1}, Now {2}'
                .format(delta, created_time, now))
-        self.assertTrue(0 <= delta <= 6000, msg)
+        self.assertLessEqual(0, delta, msg)
+        self.assertLessEqual(delta, 6000, msg)
 
 
 @six.add_metaclass(abc.ABCMeta)

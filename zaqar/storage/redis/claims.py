@@ -98,7 +98,10 @@ class ClaimController(storage.Claim, scripting.Mixin):
         """Get one or more fields from the claim Info."""
 
         values = self._client.hmget(claim_id, fields)
-        return [transform(v) for v in values] if transform else values
+        if values == [None]:
+            return values
+        else:
+            return [transform(v) for v in values] if transform else values
 
     def _claim_messages(self, msgset_key, now, limit,
                         claim_id, claim_expires, msg_ttl, msg_expires):
@@ -215,7 +218,7 @@ class ClaimController(storage.Claim, scripting.Mixin):
     @utils.retries_on_connection_error
     def get(self, queue, claim_id, project=None):
         if not self._exists(queue, claim_id, project):
-            raise errors.ClaimDoesNotExist(queue, project, claim_id)
+            raise errors.ClaimDoesNotExist(claim_id, queue, project)
 
         claim_msgs_key = utils.scope_claim_messages(claim_id,
                                                     CLAIM_MESSAGES_SUFFIX)

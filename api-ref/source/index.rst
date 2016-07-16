@@ -11,12 +11,15 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-======================
-Messaging Service APIs
-======================
+:tocdepth: 2
 
-.. toctree::
-   :maxdepth: 1
+==================================
+Messaging Service API v2 (CURRENT)
+==================================
 
-   versions/index
-   v2/index
+.. include:: versions.inc
+.. include:: queues.inc
+.. include:: claims.inc
+.. include:: subscription.inc
+.. include:: health.inc
+.. include:: pools.inc

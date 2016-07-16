@@ -139,6 +139,13 @@ class TestPoolsMongoDB(base.V2Base):
         self.simulate_put(path, body=jsonutils.dumps(doc))
         self.assertEqual(falcon.HTTP_400, self.srmock.status)
 
+    def test_put_same_database_uri(self):
+        # NOTE(cabrera): setUp creates default pool
+        expect = self.doc
+        path = self.url_prefix + '/pools/' + str(uuid.uuid1())
+        self.simulate_put(path, body=jsonutils.dumps(expect))
+        self.assertEqual(falcon.HTTP_409, self.srmock.status)
+
     def test_put_existing_overwrites(self):
         # NOTE(cabrera): setUp creates default pool
         expect = self.doc
@@ -269,7 +276,7 @@ class TestPoolsMongoDB(base.V2Base):
         result = self.simulate_get(self.url_prefix + '/pools')
         results = jsonutils.loads(result[0])
         self.assertEqual(falcon.HTTP_200, self.srmock.status)
-        self.assertTrue(len(results['pools']) == 0)
+        self.assertEqual(0, len(results['pools']))
         self.assertIn('links', results)
 
     def _listing_test(self, count=10, limit=10,
@@ -314,7 +321,7 @@ class TestPoolsMongoDB(base.V2Base):
             else:
                 # NOTE(jeffrey4l): when limit >= count, there will be no
                 # pools in the 2nd page.
-                self.assertTrue(len(next_pool_list) == 0)
+                self.assertEqual(0, len(next_pool_list))
 
             self.assertEqual(min(limit, count), len(pool_list))
             for s in pool_list + next_pool_list:
