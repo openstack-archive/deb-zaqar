@@ -1,0 +1,8 @@
+Code-Review+2: Doug Hellmann <doug@doughellmann.com>
+Workflow+1: Doug Hellmann <doug@doughellmann.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 16 Oct 2015 14:42:54 +0000
+Reviewed-on: https://review.openstack.org/235134
+Project: openstack/deb-zaqar
+Branch: refs/heads/stable/liberty

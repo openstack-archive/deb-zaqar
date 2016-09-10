@@ -1,0 +1,10 @@
+Code-Review+2: Fei Long Wang <flwang@catalyst.net.nz>
+Code-Review+1: Ryan Brown <rybrown@redhat.com>
+Code-Review+2: Flavio Percoco <fpercoco@redhat.com>
+Workflow+1: Flavio Percoco <fpercoco@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 08 Feb 2016 12:08:31 +0000
+Reviewed-on: https://review.openstack.org/268572
+Project: openstack/deb-zaqar
+Branch: refs/heads/stable/liberty

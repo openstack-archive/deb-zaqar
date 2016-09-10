@@ -1,0 +1,8 @@
+Code-Review+2: Fei Long Wang <flwang@catalyst.net.nz>
+Workflow+1: Fei Long Wang <flwang@catalyst.net.nz>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 07 Jun 2016 22:48:16 +0000
+Reviewed-on: https://review.openstack.org/311417
+Project: openstack/deb-zaqar
+Branch: refs/heads/stable/liberty
