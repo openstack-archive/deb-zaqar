@@ -1,0 +1,9 @@
+Code-Review+2: Alan Pevec <alan.pevec@redhat.com>
+Code-Review+2: Fei Long Wang <flwang@catalyst.net.nz>
+Workflow+1: Fei Long Wang <flwang@catalyst.net.nz>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 21 Jun 2016 21:06:14 +0000
+Reviewed-on: https://review.openstack.org/331846
+Project: openstack/deb-zaqar
+Branch: refs/heads/stable/mitaka

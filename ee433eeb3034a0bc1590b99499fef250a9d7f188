@@ -1,0 +1,13 @@
+Code-Review+1: wangxiyuan <wangxiyuan@huawei.com>
+Code-Review+2: Fei Long Wang <flwang@catalyst.net.nz>
+Code-Review+1: Ethan Lynn <xuanlangjian@gmail.com>
+Code-Review+1: Ryan Brown <rybrown@redhat.com>
+Code-Review+1: Victoria Martinez de la Cruz <victoria@redhat.com>
+Code-Review+2: Flavio Percoco <fpercoco@redhat.com>
+Workflow+1: Flavio Percoco <fpercoco@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 07 Apr 2016 16:18:41 +0000
+Reviewed-on: https://review.openstack.org/301380
+Project: openstack/deb-zaqar
+Branch: refs/heads/stable/mitaka
