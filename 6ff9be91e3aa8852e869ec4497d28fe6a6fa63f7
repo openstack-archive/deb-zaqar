@@ -1,0 +1,10 @@
+Code-Review+2: Flavio Percoco <fpercoco@redhat.com>
+Code-Review+1: Andreas Jaeger <jaegerandi@gmail.com>
+Code-Review+2: Fei Long Wang <flwang@catalyst.net.nz>
+Workflow+1: Fei Long Wang <flwang@catalyst.net.nz>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 24 Aug 2016 19:39:18 +0000
+Reviewed-on: https://review.openstack.org/357933
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
