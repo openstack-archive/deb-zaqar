@@ -1,4 +1,5 @@
 [gerrit]
 host=review.openstack.org
 port=29418
-project=openstack/zaqar.git
+project=openstack/deb-zaqar.git
+defaultbranch=debian/newton
