@@ -28,6 +28,36 @@ import os
 import subprocess
 import sys
 
+# TODO(Graham Hayes): Remove the following block of code when os-api-ref is
+# using openstackdocstheme
+
+import os_api_ref
+
+if getattr(os_api_ref, 'THEME', 'olsosphinx') == 'openstackdocstheme':
+    # We are on the new version with openstackdocstheme support
+
+    extensions = [
+        'os_api_ref',
+    ]
+
+    import openstackdocstheme  # noqa
+
+    html_theme = 'openstackdocs'
+    html_theme_path = [openstackdocstheme.get_html_theme_path()]
+    html_theme_options = {
+        "sidebar_mode": "toc",
+    }
+
+else:
+    # We are on the old version without openstackdocstheme support
+
+    extensions = [
+        'os_api_ref',
+        'oslosphinx',
+    ]
+
+# End temporary block
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -39,11 +69,6 @@ sys.path.insert(0, os.path.abspath('./'))
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-
-extensions = [
-    'os_api_ref',
-    'oslosphinx',
-]
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -106,24 +131,24 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output --------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  Major themes that come with
+# The theme to use for HTML and HTML Help pages. Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
 # html_theme_path = ["."]
 # html_theme = '_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
+# further. For a list of options available for each theme, see the
 # documentation.
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
-# The name for this set of Sphinx documents.  If None, it defaults to
+# The name for this set of Sphinx documents. If None, it defaults to
 # "<project> v<release> documentation".
 # html_title = None
 
-# A shorter title for the navigation bar.  Default is the same as html_title.
+# A shorter title for the navigation bar. Default is the same as html_title.
 # html_short_title = None
 
 # The name of an image file (relative to this directory) to place at the top
@@ -131,7 +156,7 @@ pygments_style = 'sphinx'
 # html_logo = None
 
 # The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
+# docs. This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 # html_favicon = None
 
@@ -172,7 +197,7 @@ html_last_updated_fmt = subprocess.Popen(
 # html_show_sourcelink = True
 
 # If true, an OpenSearch description file will be output, and all pages will
-# contain a <link> tag referring to it.  The value of this option must be the
+# contain a <link> tag referring to it. The value of this option must be the
 # base URL from which the finished HTML is served.
 # html_use_opensearch = ''
 
