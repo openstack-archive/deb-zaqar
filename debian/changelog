@@ -1,5 +1,6 @@
-zaqar (3.0.0~rc1-2) UNRELEASED; urgency=medium
+zaqar (3.0.0~rc1-2) unstable; urgency=medium
 
+  * Uploading to unstable.
   * Build-Depends on openstack-pkg-tools >= 53~.
   * Fixed oslotest EPOCH.
 
