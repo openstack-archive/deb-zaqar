@@ -1,3 +1,9 @@
+zaqar (3.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 07 Oct 2016 02:15:48 +0200
+
 zaqar (3.0.0~rc1-2) unstable; urgency=medium
 
   * Uploading to unstable.
