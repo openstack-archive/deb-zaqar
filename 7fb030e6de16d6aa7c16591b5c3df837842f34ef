@@ -1,0 +1,9 @@
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Workflow+1: Thomas Herve <therve@redhat.com>
+Code-Review+2: Thomas Herve <therve@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 15 Nov 2016 09:15:52 +0000
+Reviewed-on: https://review.openstack.org/397550
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
