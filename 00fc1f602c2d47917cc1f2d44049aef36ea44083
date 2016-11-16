@@ -1,0 +1,11 @@
+Code-Review+1: Ken'ichi Ohmichi <ken1ohmichi@gmail.com>
+Code-Review+1: Alex Schultz <aschultz@redhat.com>
+Code-Review+2: Fei Long Wang <flwang@catalyst.net.nz>
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Workflow+1: wangxiyuan <wangxiyuan@huawei.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 16 Nov 2016 02:10:37 +0000
+Reviewed-on: https://review.openstack.org/397518
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
