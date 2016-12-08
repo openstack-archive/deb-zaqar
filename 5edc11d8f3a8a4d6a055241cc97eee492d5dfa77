@@ -1,0 +1,9 @@
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Code-Review+2: wanghao <sxmatch1986@gmail.com>
+Workflow+1: wanghao <sxmatch1986@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 08 Dec 2016 02:52:01 +0000
+Reviewed-on: https://review.openstack.org/395212
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
