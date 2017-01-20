@@ -1,11 +1,13 @@
-zaqar (3.0.0-2) UNRELEASED; urgency=medium
+zaqar (3.0.0-2) unstable; urgency=medium
 
+  * Team upload.
   * d/s/options: extend-diff-ignore of .gitreview
   * d/control: Use correct branch in Vcs-* fields
   * Bumped debhelper compat version to 10
   * Added lsb-base to depends
+  * Patch-out upper constraints of SQLAlchemy
 
- -- Ondřej Nový <onovy@debian.org>  Thu, 24 Nov 2016 00:14:53 +0100
+ -- Ondřej Nový <onovy@debian.org>  Fri, 20 Jan 2017 12:05:36 +0100
 
 zaqar (3.0.0-1) unstable; urgency=medium
 
