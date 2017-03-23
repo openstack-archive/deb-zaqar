@@ -1,0 +1,9 @@
+Code-Review+2: Feilong Wang <flwang@catalyst.net.nz>
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Workflow+1: wangxiyuan <wangxiyuan@huawei.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 21 Mar 2017 01:28:00 +0000
+Reviewed-on: https://review.openstack.org/445158
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
