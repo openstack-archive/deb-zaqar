@@ -146,6 +146,7 @@ Package: zaqar-server
 Architecture: all
 Depends: adduser,
          debconf,
+         net-tools,
          python-keystoneclient,
          q-text-as-data,
          zaqar-common (= ${binary:Version}),
