@@ -1,14 +1,14 @@
 # Danish translation zaqar.
-# Copyright (C) 2014 zaqar og nedenstående oversættere.
+# Copyright (C) 2017 zaqar og nedenstående oversættere.
 # This file is distributed under the same license as the zaqar package.
-# Joe Hansen (joedalton2@yahoo.dk), 2013, 2014.
+# Joe Hansen (joedalton2@yahoo.dk), 2013, 2014, 2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: zaqar\n"
 "Report-Msgid-Bugs-To: zaqar@packages.debian.org\n"
 "POT-Creation-Date: 2016-06-13 15:01+0000\n"
-"PO-Revision-Date: 2014-02-22 12:42+0000\n"
+"PO-Revision-Date: 2017-01-10 12:42+0000\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Danish <debian-l10n-danish@lists.debian.org>\n"
 "Language: da\n"
@@ -37,17 +37,14 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../zaqar-server.templates:2001
-#, fuzzy
-#| msgid ""
-#| "Note that you will need to have an up and running Keystone server on "
-#| "which to connect using the Keystone authentication token."
 msgid ""
 "Note that you will need to have an up and running Keystone server on which "
 "to connect using a known admin project name, admin username and password. "
 "The admin auth token is not used anymore."
 msgstr ""
 "Bemærk at du skal have en op og kørende Keystoneserver, som du kan forbinde "
-"til med Keystones godkendelsessymbol."
+"til med et kendt administratorprojektnavn, administratorbrugernavn og "
+"adgangskode. Administratorgodkendelsessymbolet bruges ikke længere."
 
 #. Type: string
 #. Description
@@ -68,10 +65,8 @@ msgstr ""
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:4001
-#, fuzzy
-#| msgid "Keystone authentication token:"
 msgid "Keystone admin name:"
-msgstr "Godkendelsessymbol for Keystone:"
+msgstr "Administratornavn for Keystone:"
 
 #. Type: string
 #. Description
@@ -85,18 +80,21 @@ msgid ""
 "To register the service endpoint, this package needs to know the Admin "
 "login, name, project name, and password to the Keystone server."
 msgstr ""
+"For at registrere tjenesteslutpunktet, så skal denne pakke kende til "
+"administratorlogindet, navn, projektnavn og adgangskode for Keystone"
+"serveren."
 
 #. Type: string
 #. Description
 #: ../zaqar-server.templates:5001
 msgid "Keystone admin project name:"
-msgstr ""
+msgstr "Administratorprojektnavn for Keystone:"
 
 #. Type: password
 #. Description
 #: ../zaqar-server.templates:6001
 msgid "Keystone admin password:"
-msgstr ""
+msgstr "Administratoradgangskode for Keystone:"
 
 #. Type: string
 #. Description
@@ -207,81 +205,3 @@ msgstr "Adgangskode for godkendelsesserver:"
 msgid "Please specify the password to use with the authentication server."
 msgstr "Angiv venligt adgangskoden til brug med godkendelsesserveren."
 
-#~ msgid ""
-#~ "To configure its endpoint in Keystone, zaqar-server needs the Keystone "
-#~ "authentication token."
-#~ msgstr ""
-#~ "For at konfigurere sit slutpunkt i Keystone skal zaqar-server bruge "
-#~ "Keystones godkendelsessymbol."
-
-#~ msgid "Set up a database for Zaqar?"
-#~ msgstr "Opsæt en database for Zaqar?"
-
-#~ msgid ""
-#~ "No database has been set up for Zaqar to use. Before continuing, you "
-#~ "should make sure you have the following information:"
-#~ msgstr ""
-#~ "Der er ikke opsat en database for Zaqar. Hvis du ønsker at opsætte en nu "
-#~ "så sikr dig, at du har den følgende information:"
-
-#~ msgid ""
-#~ " * the type of database that you want to use;\n"
-#~ " * the database server hostname (that server must allow TCP connections "
-#~ "from this\n"
-#~ "   machine);\n"
-#~ " * a username and password to access the database."
-#~ msgstr ""
-#~ " * typen af database du ønsker at bruge\n"
-#~ " * værtsnavnet for databaseserveren (som skal tillade TCP-\n"
-#~ "   forbindelser fra denne maskine)\n"
-#~ " * et brugernavn og en adgangskode til at tilgå databasen"
-
-#~ msgid ""
-#~ "If some of these requirements are missing, do not choose this option and "
-#~ "run with regular SQLite support."
-#~ msgstr ""
-#~ "Hvis nogle af disse krav mangler, så vælg ikke denne indstilling og kør "
-#~ "med normal SQLite-understøttelse."
-
-#~ msgid ""
-#~ "You can change this setting later on by running \"dpkg-reconfigure -plow "
-#~ "zaqar\"."
-#~ msgstr ""
-#~ "Du kan ændre denne indstilling senere ved at køre »dpkg-reconfigure -plow "
-#~ "zaqar«."
-
-#~ msgid "Zaqar volume group:"
-#~ msgstr "Zaqar-diskenhedsgruppe:"
-
-#~ msgid ""
-#~ "Please specify the name of the LVM volume group on which Zaqar will "
-#~ "create partitions."
-#~ msgstr ""
-#~ "Angiv venligst navnet for LVM-diskenhedsgruppen hvor Zaqar vil oprette "
-#~ "partitioner."
-
-#~ msgid "IP address of your RabbitMQ host:"
-#~ msgstr "IP-adresse for din RabbitMQ-vært:"
-
-#~ msgid ""
-#~ "In order to interoperate with other components of OpenStack, this package "
-#~ "needs to connect to a central RabbitMQ server."
-#~ msgstr ""
-#~ "Denne pakke skal forbinde til en central RabbitMQ-server, for at fungere "
-#~ "med andre komponenter i OpenStack."
-
-#~ msgid "Please specify the IP address of that server."
-#~ msgstr "Angiv venligt Ip-adressen for den server."
-
-#~ msgid "Username for connection to the RabbitMQ server:"
-#~ msgstr "Brugernavn for forbindelsen til RabbitMQ-serveren:"
-
-#~ msgid "Please specify the username used to connect to the RabbitMQ server."
-#~ msgstr "Angiv venligst brugernavnet der skal bruges med RabbitMQ-serveren."
-
-#~ msgid "Password for connection to the RabbitMQ server:"
-#~ msgstr "Adgangskode for forbindelsen til RabbitMQ-serveren:"
-
-#~ msgid "Please specify the password used to connect to the RabbitMQ server."
-#~ msgstr ""
-#~ "Angiv venligt adgangskoden brugt til at forbinde med RAbbitMQ-serveren."

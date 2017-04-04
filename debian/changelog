@@ -1,3 +1,9 @@
+zaqar (3.0.0-6) unstable; urgency=medium
+
+  * Danish translation of the debconf templates (Closes: #850877).
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 04 Apr 2017 17:33:55 +0200
+
 zaqar (3.0.0-5) unstable; urgency=medium
 
   * German debconf translation update (Closes: #842488).
