@@ -1,0 +1,10 @@
+Code-Review+2: Thomas Herve <therve@redhat.com>
+Code-Review+1: Zhaokun Fu <fuzk@inspur.com>
+Code-Review+2: Feilong Wang <flwang@catalyst.net.nz>
+Workflow+1: Feilong Wang <flwang@catalyst.net.nz>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 20 Apr 2017 22:16:27 +0000
+Reviewed-on: https://review.openstack.org/451090
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
