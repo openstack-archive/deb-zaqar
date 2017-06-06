@@ -1,0 +1,15 @@
+Code-Review+1: Honza Pokorny <honza@redhat.com>
+Code-Review+1: Jiri Tomasek <jtomasek@redhat.com>
+Code-Review+1: Jason E. Rist <jrist@redhat.com>
+Code-Review+2: Feilong Wang <flwang@catalyst.net.nz>
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Workflow+1: wangxiyuan <wangxiyuan@huawei.com>
+Code-Review+1: gecong <ge.cong@zte.com.cn>
+Code-Review+2: wanghao <sxmatch1986@gmail.com>
+Workflow+1: Thomas Herve <therve@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 06 Jun 2017 07:49:41 +0000
+Reviewed-on: https://review.openstack.org/470964
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
