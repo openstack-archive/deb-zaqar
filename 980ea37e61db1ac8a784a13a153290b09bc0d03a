@@ -1,0 +1,11 @@
+Code-Review+1: XueFeng Liu <liu.xuefeng1@zte.com.cn>
+Code-Review+2: wanghao <sxmatch1986@gmail.com>
+Code-Review+1: gecong <ge.cong@zte.com.cn>
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Workflow+1: wangxiyuan <wangxiyuan@huawei.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 13 Jun 2017 04:09:58 +0000
+Reviewed-on: https://review.openstack.org/473653
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
