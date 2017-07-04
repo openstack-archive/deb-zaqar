@@ -1,0 +1,10 @@
+Code-Review+1: Alexandra Settle <a.settle@outlook.com>
+Code-Review+2: Feilong Wang <flwang@catalyst.net.nz>
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Workflow+1: wangxiyuan <wangxiyuan@huawei.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 04 Jul 2017 09:48:25 +0000
+Reviewed-on: https://review.openstack.org/479698
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
