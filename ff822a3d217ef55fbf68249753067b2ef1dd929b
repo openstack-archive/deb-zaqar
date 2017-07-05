@@ -1,0 +1,11 @@
+Code-Review+1: Nguyen Hung Phuong <phuongnh@vn.fujitsu.com>
+Code-Review+2: wangxiyuan <wangxiyuan@huawei.com>
+Code-Review+1: Van Hung Pham <hungpv@vn.fujitsu.com>
+Code-Review+2: Feilong Wang <flwang@catalyst.net.nz>
+Workflow+1: Feilong Wang <flwang@catalyst.net.nz>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 05 Jul 2017 21:40:18 +0000
+Reviewed-on: https://review.openstack.org/480111
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
