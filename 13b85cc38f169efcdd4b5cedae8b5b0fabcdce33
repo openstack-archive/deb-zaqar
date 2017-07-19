@@ -1,0 +1,10 @@
+Code-Review+2: Feilong Wang <flwang@catalyst.net.nz>
+Code-Review+1: Akihiro Motoki <amotoki@gmail.com>
+Code-Review+2: wanghao <sxmatch1986@gmail.com>
+Workflow+1: wanghao <sxmatch1986@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 19 Jul 2017 09:40:30 +0000
+Reviewed-on: https://review.openstack.org/480066
+Project: openstack/deb-zaqar
+Branch: refs/heads/master
