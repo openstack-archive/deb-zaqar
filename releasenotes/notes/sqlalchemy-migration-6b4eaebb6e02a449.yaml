@@ -1,3 +1,0 @@
----
-features:
-  - Add migration support for Zaqar's sqlalchemy storage driver.

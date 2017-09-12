@@ -1,8 +1,0 @@
-[run]
-branch = True
-omit = zaqar/tests/*
-
-[report]
-exclude_lines =
-    if _ZAQAR_SETUP__:
-    raise NotImplementedError
